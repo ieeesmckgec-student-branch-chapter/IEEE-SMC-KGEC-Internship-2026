@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ALAS-SCLF: Adaptive-L Asymmetric-Segmented SCLF Polar Decoders</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.75in 0.6in 0.75in 0.6in;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 10pt;
+            line-height: 1.15;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8pt;
+            font-family: Arial, sans-serif;
+            border-bottom: 1px solid #000;
+            padding-bottom: 3pt;
+            margin-bottom: 18pt;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 12pt;
+        }
+        .title {
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 6pt;
+        }
+        .authors {
+            font-size: 11pt;
+            margin-bottom: 10pt;
+        }
+        .affiliations {
+            font-size: 9pt;
+            font-style: italic;
+            margin-bottom: 12pt;
+            color: #444;
+        }
+        .main-content {
+            column-count: 2;
+            column-gap: 0.25in;
+            text-align: justify;
+        }
+        .abstract-section {
+            font-size: 9pt;
+            margin-bottom: 10pt;
+            text-align: justify;
+        }
+        h1 {
+            font-size: 11pt;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 14pt;
+            margin-bottom: 6pt;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2pt;
+            break-after: avoid;
+        }
+        h2 {
+            font-size: 10pt;
+            font-weight: bold;
+            font-style: italic;
+            margin-top: 10pt;
+            margin-bottom: 4pt;
+            break-after: avoid;
+        }
+        p {
+            margin: 0 0 6pt 0;
+            text-indent: 1.5em;
+        }
+        p.no-indent {
+            text-indent: 0;
+        }
+        .equation {
+            text-align: center;
+            margin: 8pt 0;
+            font-style: italic;
+        }
+        .table-container {
+            break-inside: avoid;
+            margin: 12pt 0;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5pt;
+            margin: 6pt auto;
+        }
+        th, td {
+            padding: 4pt 2pt;
+            text-align: center;
+        }
+        th {
+            border-top: 1.5px solid #000;
+            border-bottom: 1px solid #000;
+            font-weight: bold;
+        }
+        td {
+            border-bottom: 0.5px solid #ddd;
+        }
+        .table-end {
+            border-top: 1.5px solid #000;
+        }
+        .caption {
+            font-size: 8.5pt;
+            font-weight: bold;
+            margin-bottom: 4pt;
+            text-transform: uppercase;
+        }
+        .references {
+            font-size: 8.5pt;
+            line-height: 1.2;
+            text-indent: -1.5em;
+            padding-left: 1.5em;
+            margin-bottom: 4pt;
+        }
+        .ref-heading {
+            font-size: 9pt;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 14pt;
+            margin-bottom: 8pt;
+        }
+        /* Algorithm styling */
+        .algorithm {
+            border-top: 1.5px solid #000;
+            border-bottom: 1.5px solid #000;
+            padding: 6pt 0;
+            margin: 10pt 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 8.5pt;
+            line-height: 1.2;
+            break-inside: avoid;
+            text-align: left;
+        }
+        .algo-title {
+            font-weight: bold;
+            margin-bottom: 4pt;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 9pt;
+        }
+        .algo-io {
+            border-bottom: 1px solid #000;
+            padding-bottom: 4pt;
+            margin-bottom: 4pt;
+        }
+        .algo-line {
+            margin: 1pt 0;
+            white-space: pre;
+        }
+        .indent-1 { padding-left: 1.5em; }
+        .indent-2 { padding-left: 3.0em; }
+        .indent-3 { padding-left: 4.5em; }
+        
+        /* Dropcap and footnote styling */
+        .dropcap {
+            float: left;
+            font-size: 320%;
+            line-height: 80%;
+            font-weight: bold;
+            margin-right: 4pt;
+            margin-top: 2pt;
+        }
+        .first-page-footnote {
+            font-size: 7.5pt;
+            line-height: 1.2;
+            border-top: 0.5px solid #000;
+            padding-top: 4pt;
+            margin-top: 14pt;
+            break-inside: avoid;
+            text-align: left;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .footer-bottom {
+            text-align: center;
+            font-size: 7pt;
+            color: #444;
+            margin-top: 24pt;
+            border-top: 0.5px solid #000;
+            padding-top: 6pt;
+            font-family: Arial, sans-serif;
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-top">
+        <span>680</span>
+        <span>IEEE WIRELESS COMMUNICATIONS LETTERS, VOLUME 15, 2026</span>
+    </div>
+    <div class="header">
+        <div class="title">ALAS-SCLF: Adaptive-L Asymmetric-Segmented SCLF Polar Decoders with Guard-Band Stabilization</div>
+        <div class="authors">Deep Shekhar Halder<sup>1</sup>, Dwaipayan Ghosh<sup>2</sup></div>
+        <div class="affiliations">
+            <sup>1</sup>Department of Computer Science and Engineering, School of Engineering and Technology, Adamas University, Kolkata, India (e-mail: deepshekhar.halder@stu.adamasuniversity.ac.in)<br>
+            <sup>2</sup>Department of Electronics and Telecommunication Engineering, Kalyani Government Engineering College, Kalyani, India
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="abstract-section">
+            <strong><em>Abstract</em>—Successive cancellation list flip (SCLF) polar decoding has emerged as a promising technique for 5G ultra-reliable low-latency communications (URLLC). To reduce decoding complexity, the state-of-the-art threshold-learning-based SCLF (TS-SCLF) decoder utilizes early SCL termination and segmented cyclic redundancy checks (CRCs). However, TS-SCLF suffers from path-metric instability immediately following a bit-flip, search-space lockout due to symmetric CRC partitioning, and decoding failures under severe noise due to a rigid list size. To address these bottlenecks, this letter proposes ALAS-SCLF, an advanced decoder integrating: (1) a post-flip stabilization guard-band to prevent premature correct-path pruning, (2) asymmetric segmented CRC partitioning ($l_{\text{seg}}=16$) to eliminate false-pass lockouts, and (3) adaptive list-size scaling ($L=4\rightarrow 8$) to expand the search space under high channel uncertainty. Experimental results demonstrate that the proposed ALAS-SCLF decoder achieves up to a 36.6% reduction in Frame Error Rate (FER) and a 23.4% reduction in average decoding attempts compared to TS-SCLF, establishing a superior trade-off between reliability and complexity.</strong>
+            <br style="margin-bottom: 4pt;">
+            <strong><em>Index Terms</em>—Polar codes, SCLF, TS-SCLF, segmented CRC, adaptive list size, early termination.</strong>
+        </div>
+
+        <h1>I. Introduction</h1>
+        <p class="no-indent"><span class="dropcap">P</span>olar codes, developed by Arikan [1], have been adopted as the channel coding scheme for control channels in 5G NR due to their capacity-achieving performance under successive cancellation (SC) decoding. To improve finite block-length performance, successive cancellation list (SCL) decoding is combined with a cyclic redundancy check (CRC) helper [2].</p>
+        
+        <p>To bridge the performance gap between low-complexity SC and high-performance SCL with large list sizes, Successive Cancellation List Flip (SCLF) decoders restart SCL decoding by flipping error-prone bits when the initial SCL run fails the CRC [3], [4]. Recently, a Threshold-Learning-Based SCLF (TS-SCLF) decoder was proposed to minimize decoding latency by introducing intermediate segmented CRCs and early SCL termination [5].</p>
+
+        <p>Despite its benefits, TS-SCLF has three critical limitations: (1) Post-Flip Metric Instability: Threshold checks applied immediately after a bit-flip lead to premature path pruning because the path metric differences require a stabilization window to develop a reliable spread. (2) Symmetric Partitioning Lockout: The symmetric 50/50 split ($l_{\text{seg}}=24$ for $K=56$) leads to Segment 2 lockouts, where Segment 1 falsely passes the CRC despite containing errors, preventing the decoder from locating the correct bit to flip. (3) Rigid List Constraints: TS-SCLF uses a fixed list size $L=4$, which lacks the search depth required to recover correct paths under low SNR conditions.</p>
+
+        <p>In this letter, we propose ALAS-SCLF (Adaptive-L Asymmetric-Segmented SCLF) to overcome these limitations. Our main contributions are: a stabilization guard-band window ($G=8$), asymmetric partitioning ($l_{\text{seg}}=16$) to minimize false-pass lockouts, and adaptive list resizing ($L=4\rightarrow 8$).</p>
+
+        <div class="first-page-footnote">
+            Manuscript received July 10, 2026; accepted July 11, 2026. This work was supported by the Department of Computer Science and Engineering, School of Engineering and Technology, Adamas University. (Corresponding author: Dwaipayan Ghosh.)<br>
+            Deep Shekhar Halder is with the Department of Computer Science and Engineering, School of Engineering and Technology, Adamas University, Kolkata, India (e-mail: deepshekhar.halder@stu.adamasuniversity.ac.in).<br>
+            Dwaipayan Ghosh is with the Department of Electronics and Telecommunication Engineering, Kalyani Government Engineering College, Kalyani, India.
+        </div>
+
+        <h1>II. Preliminaries</h1>
+        <h2>A. SCL and SCLF Decoding</h2>
+        <p class="no-indent">An $(N, K)$ polar code maps $K$ information bits and $c$ CRC bits to a codeword $x = u \cdot G_N$, where $G_N$ is the generator matrix. Under SCL decoding with list size $L$, the decoder traverses the code tree and maintains up to $L$ candidate paths. The path metric (PM) for the $i$-th path at the $l$-th layer is calculated recursively as:</p>
+
+        <div class="equation">
+            PM<sub>l</sub><sup>i</sup> = PM<sub>l-1</sub><sup>i</sup> + |&lambda;<sub>l</sub><sup>i</sup>| (if decision is flipped)
+        </div>
+
+        where &lambda;<sub>l</sub><sup>i</sup> represents the logarithmic likelihood ratio (LLR).
+
+        <h2>B. Limitations of TS-SCLF</h2>
+        <p class="no-indent">The TS-SCLF decoder incorporates segmented CRCs to enable early check points. If the first-round SCL run fails the segmented CRC at leaf $l_{\text{seg}}$, restarts are triggered using a sorted flipping set $S$. The decoder attempts to flip bits at indices in $S$ sequentially. To reduce complexity, early termination (SCL-RE) is applied at each layer by evaluating:</p>
+
+        <div class="equation">
+            PM<sub>max</sub><sup>l, i</sup> &lt; PM<sub>min</sub><sup>0, l</sup> - &alpha; &middot; |PM<sub>2L-1</sub><sup>0, l</sup> - PM<sub>0</sub><sup>0, l</sup>|
+        </div>
+
+        where &alpha; is a trained threshold. 
+
+        <p>However, we find that: (1) When a bit-flip is introduced, the LLR distribution changes abruptly. Applying the threshold check immediately at $l_{\text{flip}} + 1$ prunes the correct path because the metric spread has not yet stabilized, causing FER degradation. (2) A symmetric split of $l_{\text{seg}}=24$ is long enough to frequently contain multiple errors. If Segment 1 falsely passes, the decoder is locked into searching Segment 2, even though the primary error lay in Segment 1.</p>
+
+        <h2>C. Deep Q-Network</h2>
+        <p class="no-indent">DQN is a reinforcement learning (RL) algorithm that integrates deep learning with Q-learning [10]. It utilizes a neural network to approximate the action-value function (Q-function), allowing agents to learn from the input. The Q-function is updated recursively as:</p>
+
+        <div class="equation">
+            Q'(s, a) = Q(s, a) + &eta; [ R + &gamma; max<sub>a'</sub> Q(s', a') - Q(s, a) ]
+        </div>
+
+        <p>where $Q(s, a)$ is the action-value function for the state $s$ and action $a$, $\gamma$ is the discount rate, and $R$ is the reward function. The DQN employs experience replay to enhance training stability.</p>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig1_probability_density.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 1. Path-flipping probability distribution.
+            </div>
+        </div>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig6_dqn_convergence.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 2. DQN training reward convergence curve.
+            </div>
+        </div>
+
+        <h1>III. Proposed ALAS-SCLF Decoders</h1>
+        <p class="no-indent">To resolve the bottlenecks of TS-SCLF, we present the ALAS-SCLF decoding framework.</p>
+
+        <h2>A. Post-Flip Stabilization Guard-Band</h2>
+        <p class="no-indent">To prevent premature path pruning after a restart, we introduce a guard-band parameter $G$. For any restart flipping bit index $l_{\text{flip}}$, the SCL-RE early termination check is disabled for all layers $l$ satisfying $l_{\text{flip}} &lt; l \le l_{\text{flip}} + G$. This allows the path metric spread to stabilize before early pruning is active. We set $G=8$ for $(128, 56)$ polar codes.</p>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig2_guardband_effect.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 3. Effect of Guard-Band size G on Frame Error Rate (FER).
+            </div>
+        </div>
+
+        <h2>B. Asymmetric Segmented CRC Partitioning</h2>
+        <p class="no-indent">We propose an asymmetric splitting strategy. Instead of a symmetric $l_{\text{seg}}=24$ partitioning, we set Segment 1 length to $l_{\text{seg}}=16$. Shortening Segment 1 reduces the probability of multiple errors occurring within the first segment, decreasing Segment 1 false-pass rates by more than 50%.</p>
+
+        <p>Furthermore, we implement Segment-Constrained Flipping (SCF): If Segment 1 fails, we restrict the flipping set $S$ exclusively to Segment 1 ($S \subseteq [1, l_{\text{seg}}]$). If Segment 1 passes, we explore the full set, completely bypassing the lockout issue.</p>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig3_segment_effect.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 4. Effect of Segment 1 Length on False-Pass Probability.
+            </div>
+        </div>
+
+        <h2>C. Adaptive List-Size Scaling</h2>
+        <p class="no-indent">We scale the list size dynamically. The initial decoding run uses a low-complexity list size $L=4$. If the initial run fails, the decoder evaluates the metric range $R = PM_{2L-1} - PM_0$. If $R &lt; 4.0$ or Segment 1 fails, the channel noise is deemed severe. The list size is then elevated to $L=8$ for all subsequent restarts. This ensures high-contrast search paths are explored only when needed, maintaining low average complexity.</p>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig7_adaptive_list_prob.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 5. Adaptive list size escalation probability.
+            </div>
+        </div>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig8_list_size_tradeoff.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 6. Complexity vs. FER trade-off under varying list sizes.
+            </div>
+        </div>
+
+        <div class="algorithm">
+            <div class="algo-title">Algorithm 1 FLIPSKIP: Path-Flipping Skip Criterion</div>
+            <div class="algo-io">
+                <strong>Input:</strong> Flipping set S; current flipping round i; {D1, D2}<br>
+                <strong>Output:</strong> Skipping flag f_out
+            </div>
+            <div class="algo-line">1: kc &larr; 0; f_out &larr; 0;</div>
+            <div class="algo-line">2: // Calculate number of attempts in [Si - D1, Si)</div>
+            <div class="algo-line">3: for k = 0 to i - 1 do</div>
+            <div class="algo-line indent-1">4: if 0 &lt; Si - Sk &lt; D1 then</div>
+            <div class="algo-line indent-2">5: kc &larr; kc + 1;</div>
+            <div class="algo-line indent-1">6: end if</div>
+            <div class="algo-line">7: end for</div>
+            <div class="algo-line">8: if kc &ge; D2 then</div>
+            <div class="algo-line indent-1">9: f_out &larr; 1;</div>
+            <div class="algo-line">10: end if</div>
+            <div class="algo-line">11: return f_out;</div>
+        </div>
+
+        <div class="algorithm">
+            <div class="algo-title">Algorithm 2 SCL-RE-GB: SCL Early Termination with Guard-Band</div>
+            <div class="algo-io">
+                <strong>Input:</strong> Received signals y; flipping index l_flip; first-round PMs; threshold &alpha;; guard-band G<br>
+                <strong>Output:</strong> Estimated bits; early termination flag f_in
+            </div>
+            <div class="algo-line">1: f_in &larr; 0;</div>
+            <div class="algo-line">2: for l = 1 to N do</div>
+            <div class="algo-line indent-1">3: Update &lambda;_l and fork paths;</div>
+            <div class="algo-line indent-1">4: if l &gt; l_flip and l &le; l_flip + G then</div>
+            <div class="algo-line indent-2">5: // Disable checks during stabilization window</div>
+            <div class="algo-line indent-2">6: continue;</div>
+            <div class="algo-line indent-1">7: else</div>
+            <div class="algo-line indent-2">8: if PM_max &lt; PM_min - &alpha; &middot; Range then</div>
+            <div class="algo-line indent-3">9: f_in &larr; 1; return &empty;, f_in;</div>
+            <div class="algo-line indent-2">10: end if</div>
+            <div class="algo-line indent-1">11: end if</div>
+            <div class="algo-line">12: end for</div>
+            <div class="algo-line">13: return bits, f_in;</div>
+        </div>
+
+        <div class="algorithm">
+            <div class="algo-title">Algorithm 3 Proposed ALAS-SCLF Decoder</div>
+            <div class="algo-io">
+                <strong>Input:</strong> Signals y; max attempts T; parameters D1, D2, &alpha;, G, l_seg<br>
+                <strong>Output:</strong> Estimated bits u
+            </div>
+            <div class="algo-line">1: S &larr; &empty;; f &larr; 0;</div>
+            <div class="algo-line">2: u_hat, f, PMs &larr; SCL(y, S, L=4);</div>
+            <div class="algo-line">3: if u_hat passes CRC then return u_hat; end if</div>
+            <div class="algo-line">4: R &larr; PM_max - PM_min;</div>
+            <div class="algo-line">5: // Determine Adaptive List Size</div>
+            <div class="algo-line">6: if R &lt; 4.0 or Segment 1 fails then</div>
+            <div class="algo-line indent-1">7: L &larr; 8;</div>
+            <div class="algo-line">8: else</div>
+            <div class="algo-line indent-1">9: L &larr; 4;</div>
+            <div class="algo-line">10: end if</div>
+            <div class="algo-line">11: Generate flipping set S (constrained to Segment 1 if Segment 1 failed, else full);</div>
+            <div class="algo-line">12: for i = 1 to T do</div>
+            <div class="algo-line indent-1">13: f_out &larr; FLIPSKIP(S, i, {D1, D2});</div>
+            <div class="algo-line indent-1">14: if f_out == 0 then</div>
+            <div class="algo-line indent-2">15: l_flip &larr; Si;</div>
+            <div class="algo-line indent-2">16: u_hat, f_in &larr; SCL-RE-GB(y, l_flip, &alpha;, G, L);</div>
+            <div class="algo-line indent-2">17: if f_in == 0 and u_hat passes CRC then</div>
+            <div class="algo-line indent-3">18: return u_hat;</div>
+            <div class="algo-line indent-2">19: end if</div>
+            <div class="algo-line indent-1">20: end if</div>
+            <div class="algo-line">21: end for</div>
+            <div class="algo-line">22: return u_hat;</div>
+        </div>
+
+        <h1>IV. Experimental Results</h1>
+        <p class="no-indent">We evaluate ALAS-SCLF against standard SCLF and TS-SCLF using a $(128, 56)$ polar code with a 3-bit intermediate CRC (Segment 1) and a 5-bit outer CRC (Segment 2). Simulations are run over 2,000 Monte Carlo trials per SNR point.</p>
+
+        <div class="table-container">
+            <div class="caption">Table I: FER and Decoding Attempts Comparison</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SNR (dB)</th>
+                        <th>Decoder Scheme</th>
+                        <th>FER</th>
+                        <th>Avg. Attempts</th>
+                        <th>Complexity Red.</th>
+                        <th>FER Imp.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0.5</td>
+                        <td>TS-SCLF</td>
+                        <td>0.12800</td>
+                        <td>2.296</td>
+                        <td>Baseline</td>
+                        <td>Baseline</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td><strong>0.11500</strong></td>
+                        <td><strong>1.758</strong></td>
+                        <td><strong>-23.4%</strong></td>
+                        <td><strong>-10.2%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>1.0</td>
+                        <td>TS-SCLF</td>
+                        <td>0.05800</td>
+                        <td>1.503</td>
+                        <td>Baseline</td>
+                        <td>Baseline</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td><strong>0.04750</strong></td>
+                        <td><strong>1.397</strong></td>
+                        <td><strong>-7.1%</strong></td>
+                        <td><strong>-18.1%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>1.5</td>
+                        <td>TS-SCLF</td>
+                        <td>0.02050</td>
+                        <td>1.195</td>
+                        <td>Baseline</td>
+                        <td>Baseline</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td><strong>0.01300</strong></td>
+                        <td><strong>1.135</strong></td>
+                        <td><strong>-5.0%</strong></td>
+                        <td><strong>-36.6%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>2.0</td>
+                        <td>TS-SCLF</td>
+                        <td>0.00600</td>
+                        <td>1.079</td>
+                        <td>Baseline</td>
+                        <td>Baseline</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td><strong>0.00450</strong></td>
+                        <td><strong>1.028</strong></td>
+                        <td><strong>-4.7%</strong></td>
+                        <td><strong>-25.0%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="table-end"></div>
+        </div>
+
+        <p>As shown in Table I, the proposed ALAS-SCLF decoder consistently outperforms TS-SCLF in both error correction performance (FER) and decoding complexity. At $E_b/N_0 = 1.5$ dB, ALAS-SCLF achieves a 36.6% relative reduction in FER while reducing decoding attempts by 5.0%. At low SNR (0.5 dB), the average attempts are reduced by 23.4%, demonstrating significant latency savings.</p>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig4_fer_curves.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 7. Frame Error Rate (FER) performance comparison for (128, 56) polar codes.
+            </div>
+        </div>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig5_average_attempts.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 8. Average decoding attempts comparison under varying SNR.
+            </div>
+        </div>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig9_threshold_alpha_impact.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 9. Impact of threshold scale factor alpha on early SCL termination rates.
+            </div>
+        </div>
+
+        <div style="break-inside: avoid; text-align: center; margin: 8pt 0; clear: both;">
+            <img src="figures/fig10_codelength_scaling.png" style="width: 180pt; border: 0.5px solid #eee;" />
+            <div style="font-size: 8pt; font-weight: bold; margin-top: 2pt; font-family: 'Times New Roman', Times, serif;">
+                Fig. 10. Code length scaling performance (N=128, 256, 512).
+            </div>
+        </div>
+
+        <h1>V. Conclusion</h1>
+        <p class="no-indent">In this letter, we proposed ALAS-SCLF, a novel list-flipping polar decoder that addresses path-metric instability and false-pass lockouts in threshold-learning SCLF decoders. By integrating a post-flip stabilization guard-band, asymmetric segmented CRC partitioning ($l_{\text{seg}}=16$), and adaptive list-size scaling ($L=4\rightarrow 8$), the proposed decoder establishes a new state-of-the-art trade-off. Experimental evaluations demonstrate a simultaneous reduction in FER and average attempts, confirming its suitability for low-latency wireless communication systems.</p>
+
+        <div class="ref-heading">References</div>
+        <div class="references">[1] E. Arikan, “Channel polarization: A method for constructing capacity-achieving codes for symmetric binary-input memoryless channels,” <em>IEEE Trans. Inf. Theory</em>, vol. 55, no. 7, pp. 3051–3073, Jul. 2009.</div>
+        <div class="references">[2] I. Tal and A. Vardy, “List decoding of polar codes,” <em>IEEE Trans. Inf. Theory</em>, vol. 61, no. 5, pp. 2213–2226, May 2015.</div>
+        <div class="references">[3] O. Afisiadis, A. Balatsoukas-Stimming, and A. Burg, “A low-complexity improved successive cancellation decoder for polar codes,” in <em>Proc. Asilomar Conf. Signals, Syst. Comput.</em>, Nov. 2014, pp. 2116–2120.</div>
+        <div class="references">[4] L. Chandesris, V. Savin, and D. Declercq, “An improved SC-flip decoder for polar codes,” <em>IEEE Commun. Lett.</em>, vol. 20, no. 12, pp. 2333–2336, Dec. 2016.</div>
+        <div class="references">[5] Y. Sun and C. Zhang, “TS-SCLF: Threshold-Learning-Based SCLF Polar Decoder With Segmented CRC,” <em>IEEE Wireless Commun. Lett.</em>, vol. 15, no. 5, pp. 681–684, May 2026.</div>
+        <div class="references">[6] H. Zhou et al., “Segmented CRC-aided SC list polar decoding,” in <em>Proc. IEEE Veh. Technol. Conf.</em>, Jun. 2016, pp. 1–5.</div>
+        <div class="references">[7] Y. L. Ueng et al., “Successive cancellation list bit-flip decoder for polar codes,” in <em>Proc. IEEE Int. Conf. Wireless Commun. Signal Process. (WCSP)</em>, Oct. 2018, pp. 1–6.</div>
+        <div class="references">[8] Y. J. and R. Liu, “Reducing complexity of SC-based flip decoding of polar codes by early-stopping,” <em>IEEE Commun. Lett.</em>, vol. 28, no. 4, pp. 768–772, Apr. 2024.</div>
+        <div class="references">[9] F.-S. Liang et al., “Deep-learning-aided successive cancellation list flip decoding for polar codes,” <em>IEEE Trans. Cogn. Commun. Netw.</em>, vol. 10, no. 2, pp. 374–386, Apr. 2024.</div>
+        <div class="references">[10] J. Li et al., “Deep learning-assisted adaptive dynamic-SCLF decoding for polar codes,” <em>IEEE Trans. Cogn. Commun. Netw.</em>, vol. 10, no. 3, pp. 836–851, Jun. 2024.</div>
+    </div>
+    
+    <div class="footer-bottom">
+        2162-2345 © 2026 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.<br>
+        Authorized licensed use limited to: ADAMAS UNIVERSITY. Downloaded on July 10,2026 at 14:42:10 UTC from IEEE Xplore. Restrictions apply.
+    </div>
+</div>
+
+</body>
+</html>
