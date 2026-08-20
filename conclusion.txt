@@ -1,0 +1,11 @@
+FINAL CONCLUSION  : -
+------------------------
+Lion Optimization achieved lower latency compared to PSO and DE under increasing workloads.
+
+Random Forest successfully selected optimizers dynamically.
+
+The proposed system improved task offloading efficiency in MEC environments.
+
+The workload experiments demonstrated that increasing task load increases latency, energy consumption, and overload.
+
+Among all approaches, Lion Optimization produced the most efficient results.
