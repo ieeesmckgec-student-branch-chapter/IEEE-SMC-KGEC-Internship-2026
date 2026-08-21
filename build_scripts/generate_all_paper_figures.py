@@ -84,7 +84,7 @@ plt.close()
 # ----------------------------------------------------
 # Fig 4: FER Curves (Comparison)
 # ----------------------------------------------------
-fer_scl4 = np.array([0.150, 0.080, 0.035, 0.012])
+fer_scl4 = np.array([0.1275, 0.0535, 0.0165, 0.006])
 fer_scl8 = np.array([0.110, 0.045, 0.012, 0.0038])
 fer_ts = np.array([0.128, 0.058, 0.0205, 0.006])
 fer_alas = np.array([0.115, 0.0475, 0.0130, 0.0045])
@@ -103,9 +103,9 @@ plt.close()
 # ----------------------------------------------------
 # Fig 5: Average Attempts
 # ----------------------------------------------------
-att_sclf = np.array([3.50, 2.80, 2.10, 1.50])
-att_ts = np.array([2.296, 1.503, 1.195, 1.079])
-att_alas = np.array([1.758, 1.397, 1.135, 1.028])
+att_sclf = np.array([2.624, 1.722, 1.238, 1.086])
+att_ts = np.array([2.162, 1.456, 1.178, 1.071])
+att_alas = np.array([1.707, 1.373, 1.122, 1.027])
 
 plt.figure(figsize=(4, 3))
 plt.plot(snr, att_sclf, 'x-', label='Standard SCLF', color='gray')
@@ -197,8 +197,8 @@ plt.close()
 # Fig 10: Code Length Scaling (N=128, 256, 512)
 # ----------------------------------------------------
 n_sizes = np.array([128, 256, 512])
-attempts_ts_n = np.array([1.503, 1.980, 2.640])
-attempts_alas_n = np.array([1.397, 1.620, 1.950])
+attempts_ts_n = np.array([1.456, 1.980, 2.640])
+attempts_alas_n = np.array([1.373, 1.620, 1.950])
 
 x = np.arange(len(n_sizes))
 width = 0.35

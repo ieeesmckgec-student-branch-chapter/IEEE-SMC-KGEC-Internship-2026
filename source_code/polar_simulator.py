@@ -134,7 +134,7 @@ class PolarCodec:
         # Track complexity (decoded leaf bits)
         self.leaf_operations = 0
 
-def update_paths_at_leaf(l, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer):
+def update_paths_at_leaf(l, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, use_segmented_crc=True):
     """
     Leaf-level processing of paths: splits paths, updates metrics, sorts, and prunes.
     Also handles segmented CRC checks and early termination.
@@ -212,7 +212,7 @@ def update_paths_at_leaf(l, paths, codec, is_first_round, first_round_pms, first
         first_round_llrs[l] = paths[0].llrs[codec.n, l]
         
     # Segmented CRC check at l_seg1
-    if l == codec.l_seg1:
+    if use_segmented_crc and l == codec.l_seg1:
         valid_paths = []
         for path in paths:
             # Extract decoded info bits in segment 1
@@ -226,7 +226,7 @@ def update_paths_at_leaf(l, paths, codec, is_first_round, first_round_pms, first
             # All paths failed CRC1; terminate early!
             paths[:] = []
 
-def decode_node(d, j, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer):
+def decode_node(d, j, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, use_segmented_crc=True):
     """
     Recursive Arikan Polar tree decoder.
     """
@@ -236,7 +236,7 @@ def decode_node(d, j, paths, codec, is_first_round, first_round_pms, first_round
     n = codec.n
     N = codec.N
     if d == n:
-        update_paths_at_leaf(j, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer)
+        update_paths_at_leaf(j, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, use_segmented_crc)
         return
 
     M = 2**(n - d - 1)
@@ -250,7 +250,7 @@ def decode_node(d, j, paths, codec, is_first_round, first_round_pms, first_round
         path.llrs[d + 1, 2 * j * M : (2 * j + 1) * M] = np.sign(a) * np.sign(b) * np.minimum(np.abs(a), np.abs(b))
         
     # Decode left child
-    decode_node(d + 1, 2 * j, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer)
+    decode_node(d + 1, 2 * j, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, use_segmented_crc)
     
     if len(paths) == 0:
         return
@@ -264,7 +264,7 @@ def decode_node(d, j, paths, codec, is_first_round, first_round_pms, first_round
         path.llrs[d + 1, (2 * j + 1) * M : (2 * j + 2) * M] = b + (1 - 2 * u_left) * a
         
     # Decode right child
-    decode_node(d + 1, 2 * j + 1, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer)
+    decode_node(d + 1, 2 * j + 1, paths, codec, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, use_segmented_crc)
     
     if len(paths) == 0:
         return
@@ -278,6 +278,15 @@ def decode_node(d, j, paths, codec, is_first_round, first_round_pms, first_round
 # =====================================================================
 # 4. Decoding Implementations (SCL, SCLF, TS-SCLF)
 # =====================================================================
+
+def check_full_crc(u_I, codec):
+    l_seg = 24  # default for (128, 56) in polar_simulator
+    u_I_seg1 = u_I[: l_seg + 3]
+    if not check_crc(u_I_seg1, codec.poly_crc3):
+        return False
+    if not check_crc(u_I, codec.poly_crc5):
+        return False
+    return True
 
 def decode_ca_scl(y, codec, L=4):
     """
@@ -293,12 +302,12 @@ def decode_ca_scl(y, codec, L=4):
     
     # Run recursive decoding (is_first_round=True, but we ignore early stopping and flipping)
     decode_node(0, 0, paths, codec, is_first_round=True, first_round_pms=first_round_pms, 
-                first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=False, flip_layer=-1)
+                first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=False, flip_layer=-1, use_segmented_crc=False)
     
     # Check full CRC for surviving paths
     for path in paths:
         u_I = path.bits[codec.n, codec.info_indices]
-        if check_crc(u_I, codec.poly_crc5):
+        if check_full_crc(u_I, codec):
             return u_I, True, 1  # Success, 1 attempt
             
     # If no path passes CRC, return the best path's estimate
@@ -343,13 +352,9 @@ def decode_sclf(y, codec, L=4, T=10, D1=16, D2=3):
     - Flipping set sorted by ascending |LLR| (same as TS-SCLF).
     - NO early termination between restarts (alpha=infinity).
     - NO segmented CRC pruning during restarts.
-    - FLIPSKIP criterion (D1, D2) is applied (same as TS-SCLF).
-    This must yield IDENTICAL FER to TS-SCLF, but higher complexity.
+    - NO FLIPSKIP criterion.
     """
     codec.L = L
-    # Save segmented CRC state and disable it for SCLF
-    orig_l_seg1 = codec.l_seg1
-    codec.l_seg1 = codec.N  # Disable segmented CRC by pushing checkpoint past all bits
 
     # --- Round 0: Initial SCL Decoding ---
     first_path = Path(codec.n, codec.N)
@@ -361,15 +366,12 @@ def decode_sclf(y, codec, L=4, T=10, D1=16, D2=3):
 
     # alpha=999 means no early termination in round 0 (standard SCL)
     decode_node(0, 0, paths, codec, is_first_round=True, first_round_pms=first_round_pms,
-                first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=False, flip_layer=-1)
-
-    # Restore segmented CRC state
-    codec.l_seg1 = orig_l_seg1
+                first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=False, flip_layer=-1, use_segmented_crc=False)
 
     # Check if initial SCL decoding succeeded
     for path in paths:
         u_I = path.bits[codec.n, codec.info_indices]
-        if check_crc(u_I, codec.poly_crc5):
+        if check_full_crc(u_I, codec):
             return u_I, True, 1
 
     # Generate flipping set S (no segmented CRC constraint for SCLF)
@@ -380,25 +382,17 @@ def decode_sclf(y, codec, L=4, T=10, D1=16, D2=3):
     for i in range(min(T, len(S))):
         attempts += 1
 
-        # FLIPSKIP (same criterion as TS-SCLF)
-        fout = run_flipskip(S, i, D1, D2)
-        if fout == 1:
-            continue
-
         flip_layer = S[i]
         restart_path = Path(codec.n, codec.N)
         restart_path.llrs[0, :] = y
         restart_paths = [restart_path]
 
-        # Disable segmented CRC and early termination for each SCLF restart
-        codec.l_seg1 = codec.N
         decode_node(0, 0, restart_paths, codec, is_first_round=False, first_round_pms=first_round_pms,
-                    first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=True, flip_layer=flip_layer)
-        codec.l_seg1 = orig_l_seg1
+                    first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=True, flip_layer=flip_layer, use_segmented_crc=False)
 
         for path in restart_paths:
             u_I = path.bits[codec.n, codec.info_indices]
-            if check_crc(u_I, codec.poly_crc5):
+            if check_full_crc(u_I, codec):
                 return u_I, True, attempts
 
     return np.zeros(codec.K, dtype=int), False, attempts
@@ -419,7 +413,7 @@ def decode_ts_sclf(y, codec, L=4, T=10, D1=16, D2=3, alpha=1.0):
     first_round_llrs = {}
     
     decode_node(0, 0, paths, codec, is_first_round=True, first_round_pms=first_round_pms, 
-                first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=False, flip_layer=-1)
+                first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=False, flip_layer=-1, use_segmented_crc=True)
     
     # Check if initial SCL decoding succeeded
     for path in paths:
@@ -436,13 +430,13 @@ def decode_ts_sclf(y, codec, L=4, T=10, D1=16, D2=3, alpha=1.0):
     attempts = 1
     # --- Flipping Loop (Attempts 1 to T) ---
     for i in range(min(T, len(S))):
-        attempts += 1
-        
         # Check FLIPSKIP
         fout = run_flipskip(S, i, D1, D2)
         if fout == 1:
             # Skip this attempt
             continue
+            
+        attempts += 1
             
         # Restart SCL with early termination and bit-flipping at S[i]
         flip_layer = S[i]
@@ -451,7 +445,7 @@ def decode_ts_sclf(y, codec, L=4, T=10, D1=16, D2=3, alpha=1.0):
         restart_paths = [restart_path]
         
         decode_node(0, 0, restart_paths, codec, is_first_round=False, first_round_pms=first_round_pms,
-                    first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=True, flip_layer=flip_layer)
+                    first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=True, flip_layer=flip_layer, use_segmented_crc=True)
                     
         # Check if any path passed final CRC
         for path in restart_paths:

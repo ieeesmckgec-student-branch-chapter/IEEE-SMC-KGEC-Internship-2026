@@ -152,6 +152,34 @@ This ensures high-contrast search paths are explored only when needed, maintaini
 \label{fig:list_size_tradeoff}
 \end{figure}
 
+\subsection{DQN-Based Threshold Optimization for ALAS-SCLF}
+The proposed ALAS-SCLF decoder operates under three threshold parameters: the FLIPSKIP window $D_1$, the FLIPSKIP count trigger $D_2$, and the early SCL termination scale factor $\alpha$. Manual grid search over these parameters is computationally expensive. Following the threshold-learning methodology of~\cite{sun2026}, we apply Deep Q-Network (DQN) reinforcement learning to learn the optimal parameter set $\mathbf{s}^* = \{D_1^*, D_2^*, \alpha^*\}$ directly for the proposed ALAS-SCLF decoder.
+
+\subsubsection{State and Action Space}
+The RL state is the current parameter vector $\mathbf{s} = [D_1, D_2, \alpha]$ and the action space consists of six discrete increment/decrement actions over the three parameters:
+\begin{equation}
+\mathcal{A} = \{ \pm\Delta D_1,\; \pm\Delta D_2,\; \pm\Delta\alpha \}
+\end{equation}
+with step sizes $\Delta D_1 = 2$, $\Delta D_2 = 1$, and $\Delta\alpha = 0.25$.
+
+\subsubsection{Reward Function}
+We implement the exact reward function defined in the TS-SCLF paper~\cite{sun2026} (Equation 7), adapted to our proposed decoder:
+\begin{equation}
+R(\mathbf{s}) = \begin{cases}
+T_{\text{prev}} - T_{\text{curr}}(\mathbf{s}), & \text{if } \mathrm{FER}(\mathbf{s}) \leq (1+\delta)\cdot\mathrm{FER}_{\text{ref}} \\
+-1000, & \text{otherwise}
+\end{cases}
+\label{eq:dqn_reward}
+\end{equation}
+where $T_{\text{prev}}$ is the average decoding attempts of the previous state, $T_{\text{curr}}(\mathbf{s})$ is the average attempts of the current state evaluated via Monte Carlo simulation, $\mathrm{FER}_{\text{ref}}$ is the TS-SCLF reference FER at the optimization SNR, and $\delta = 0.15$ is the reliability slack factor. A positive reward is issued when the new parameter set reduces complexity while remaining within the FER constraint. A large negative penalty of $-1000$ is assigned for any FER violation, preventing the optimizer from finding solutions that degrade reliability.
+
+\subsubsection{Q-Network and Training}
+The DQN approximates the action-value function $Q(\mathbf{s}, a)$ using a two-hidden-layer MLP ($64 \rightarrow 64$ units, ReLU activations) with Xavier initialization. The Q-function is updated via the Bellman equation:
+\begin{equation}
+Q(s,a) \leftarrow Q(s,a) + \eta \Big[ R + \gamma \max_{a'} Q(s', a') - Q(s,a) \Big]
+\end{equation}
+with discount factor $\gamma = 0.99$ and learning rate $\eta = 0.001$. Experience replay with a replay buffer is used to decorrelate training samples and improve convergence. The agent follows an $\epsilon$-greedy policy with exponential decay ($\epsilon_{\text{init}} = 1.0 \rightarrow \epsilon_{\text{min}} = 0.01$).
+
 \begin{algorithm}
 \caption{FLIPSKIP: Path-Flipping Skip Criterion}
 \begin{algorithmic}[1]
@@ -234,23 +262,23 @@ We evaluate ALAS-SCLF against standard SCLF and TS-SCLF using a $(128, 56)$ pola
 \toprule
 \textbf{SNR (dB)} & \textbf{Decoder Scheme} & \textbf{FER} & \textbf{Avg. Attempts} & \textbf{Complexity Red.} & \textbf{FER Imp.} \\
 \midrule
-0.5 & TS-SCLF & 0.12800 & 2.296 & Baseline & Baseline \\
-    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.11500} & \textbf{1.758} & \textbf{-23.4\%} & \textbf{-10.2\%} \\
+0.5 & TS-SCLF & 0.12800 & 2.162 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.11500} & \textbf{1.707} & \textbf{-21.0\%} & \textbf{-10.2\%} \\
 \midrule
-1.0 & TS-SCLF & 0.05800 & 1.503 & Baseline & Baseline \\
-    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.04750} & \textbf{1.397} & \textbf{-7.1\%} & \textbf{-18.1\%} \\
+1.0 & TS-SCLF & 0.05800 & 1.456 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.04750} & \textbf{1.373} & \textbf{-5.7\%} & \textbf{-18.1\%} \\
 \midrule
-1.5 & TS-SCLF & 0.02050 & 1.195 & Baseline & Baseline \\
-    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.01300} & \textbf{1.135} & \textbf{-5.0\%} & \textbf{-36.6\%} \\
+1.5 & TS-SCLF & 0.02050 & 1.178 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.01300} & \textbf{1.122} & \textbf{-4.8\%} & \textbf{-36.6\%} \\
 \midrule
-2.0 & TS-SCLF & 0.00600 & 1.079 & Baseline & Baseline \\
-    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.00450} & \textbf{1.028} & \textbf{-4.7\%} & \textbf{-25.0\%} \\
+2.0 & TS-SCLF & 0.00600 & 1.071 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.00450} & \textbf{1.027} & \textbf{-4.1\%} & \textbf{-25.0\%} \\
 \bottomrule
 \end{tabular}
 \label{tab:comparison}
 \end{table}
 
-As shown in Table \ref{tab:comparison}, the proposed ALAS-SCLF decoder consistently outperforms TS-SCLF in both error correction performance (FER) and decoding complexity. At $E_b/N_0 = 1.5$ dB, ALAS-SCLF achieves a 36.6\% relative reduction in FER while reducing decoding attempts by 5.0\%. At low SNR (0.5 dB), the average attempts are reduced by 23.4\%, demonstrating significant latency savings.
+As shown in Table \ref{tab:comparison}, the proposed ALAS-SCLF decoder consistently outperforms TS-SCLF in both error correction performance (FER) and decoding complexity. At $E_b/N_0 = 1.5$ dB, ALAS-SCLF achieves a 36.6\% relative reduction in FER while reducing decoding attempts by 4.8\%. At low SNR (0.5 dB), the average attempts are reduced by 21.0\%, demonstrating significant latency savings.
 
 \begin{figure}[htbp]
 \centering

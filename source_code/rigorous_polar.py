@@ -130,7 +130,7 @@ def copy_path(path, n, N):
     new_path.bits = np.copy(path.bits)
     return new_path
 
-def update_paths_at_leaf(l, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band=12, use_lra_ast=False, gamma_lra=0.8):
+def update_paths_at_leaf(l, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band=12, use_lra_ast=False, gamma_lra=0.8, use_segmented_crc=True):
     """
     Leaf-level processing of paths: splits paths, updates metrics, sorts, and prunes.
     Also handles SCL-RE early stopping, LLR-ranking recording, and Segmented CRC checks.
@@ -205,7 +205,7 @@ def update_paths_at_leaf(l, paths, code, L, is_first_round, first_round_pms, fir
             first_round_pms[l] = candidate_pms
             
     # --- Segmented CRC Check (During both initial and restarted runs) ---
-    if l == code.l_seg1 and len(paths) > 0:
+    if use_segmented_crc and l == code.l_seg1 and len(paths) > 0:
         valid_paths = []
         l_seg = code.l_seg if hasattr(code, 'l_seg') else 24
         for path in paths:
@@ -220,7 +220,7 @@ def update_paths_at_leaf(l, paths, code, L, is_first_round, first_round_pms, fir
             paths[:] = []
             return
 
-def decode_node(d, j, paths, code, L, is_first_round=True, first_round_pms=None, first_round_llrs=None, alpha=1.0, is_flipping=False, flip_layer=-1, guard_band=12, use_lra_ast=False, gamma_lra=0.8):
+def decode_node(d, j, paths, code, L, is_first_round=True, first_round_pms=None, first_round_llrs=None, alpha=1.0, is_flipping=False, flip_layer=-1, guard_band=12, use_lra_ast=False, gamma_lra=0.8, use_segmented_crc=True):
     """
     Recursive Arikan Polar tree decoder.
     """
@@ -230,7 +230,7 @@ def decode_node(d, j, paths, code, L, is_first_round=True, first_round_pms=None,
     n = code.n
     N = code.N
     if d == n:
-        update_paths_at_leaf(j, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band, use_lra_ast, gamma_lra)
+        update_paths_at_leaf(j, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band, use_lra_ast, gamma_lra, use_segmented_crc)
         return
 
     M = 2**(n - d - 1)
@@ -243,7 +243,7 @@ def decode_node(d, j, paths, code, L, is_first_round=True, first_round_pms=None,
         path.llrs[d + 1, 2 * j * M : (2 * j + 1) * M] = np.sign(a) * np.sign(b) * np.minimum(np.abs(a), np.abs(b))
         
     # Decode left child
-    decode_node(d + 1, 2 * j, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band, use_lra_ast, gamma_lra)
+    decode_node(d + 1, 2 * j, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band, use_lra_ast, gamma_lra, use_segmented_crc)
     
     if len(paths) == 0:
         return
@@ -256,7 +256,7 @@ def decode_node(d, j, paths, code, L, is_first_round=True, first_round_pms=None,
         path.llrs[d + 1, (2 * j + 1) * M : (2 * j + 2) * M] = b + (1 - 2 * u_left) * a
         
     # Decode right child
-    decode_node(d + 1, 2 * j + 1, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band, use_lra_ast, gamma_lra)
+    decode_node(d + 1, 2 * j + 1, paths, code, L, is_first_round, first_round_pms, first_round_llrs, alpha, is_flipping, flip_layer, guard_band, use_lra_ast, gamma_lra, use_segmented_crc)
     
     if len(paths) == 0:
         return
@@ -267,6 +267,15 @@ def decode_node(d, j, paths, code, L, is_first_round=True, first_round_pms=None,
         u_right = path.bits[d + 1, (2 * j + 1) * M : (2 * j + 2) * M]
         path.bits[d, j * L_sub : (j + 1) * L_sub] = np.concatenate([u_left ^ u_right, u_right])
 
+def check_full_crc(u_I, code):
+    l_seg = code.l_seg if hasattr(code, 'l_seg') else 24
+    u_I_seg1 = u_I[: l_seg + 3]
+    if not check_crc(u_I_seg1, POLY_CRC3):
+        return False
+    if not check_crc(u_I, POLY_CRC5):
+        return False
+    return True
+
 def decode_ca_scl(y, code, L=4):
     """
     CRC-Aided Successive Cancellation List (CA-SCL) decoder.
@@ -275,12 +284,12 @@ def decode_ca_scl(y, code, L=4):
     first_path.llrs[0, :] = y
     
     paths = [first_path]
-    decode_node(0, 0, paths, code, L, is_first_round=True, first_round_pms=None, first_round_llrs=None, alpha=999.0, is_flipping=False, flip_layer=-1)
+    decode_node(0, 0, paths, code, L, is_first_round=True, first_round_pms=None, first_round_llrs=None, alpha=999.0, is_flipping=False, flip_layer=-1, use_segmented_crc=False)
     
     # Check full CRC for surviving paths
     for path in paths:
         u_I = path.bits[code.n, code.info_indices]
-        if check_crc(u_I, POLY_CRC5):
+        if check_full_crc(u_I, code):
             return u_I, True
             
     # Fallback to the best path's estimate if none pass CRC
@@ -329,11 +338,11 @@ def decode_sclf(y, code, L=4, T=10, D1=16, D2=3):
     paths = [first_path]
     
     first_round_llrs = {}
-    decode_node(0, 0, paths, code, L, is_first_round=True, first_round_pms=None, first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=False, flip_layer=-1)
+    decode_node(0, 0, paths, code, L, is_first_round=True, first_round_pms=None, first_round_llrs=first_round_llrs, alpha=999.0, is_flipping=False, flip_layer=-1, use_segmented_crc=False)
     
     for path in paths:
         u_I = path.bits[code.n, code.info_indices]
-        if check_crc(u_I, POLY_CRC5):
+        if check_full_crc(u_I, code):
             return u_I, True, 1
             
     S = generate_flipping_set(first_round_llrs, code, failed_seg1=False)
@@ -341,20 +350,17 @@ def decode_sclf(y, code, L=4, T=10, D1=16, D2=3):
     attempts = 1
     for i in range(min(T, len(S))):
         attempts += 1
-        fout = run_flipskip(S, i, D1, D2)
-        if fout == 1:
-            continue
-            
+        
         flip_layer = S[i]
         restart_path = Path(code.n, code.N)
         restart_path.llrs[0, :] = y
         restart_paths = [restart_path]
         
-        decode_node(0, 0, restart_paths, code, L, is_first_round=False, first_round_pms=None, first_round_llrs=None, alpha=999.0, is_flipping=True, flip_layer=flip_layer)
+        decode_node(0, 0, restart_paths, code, L, is_first_round=False, first_round_pms=None, first_round_llrs=None, alpha=999.0, is_flipping=True, flip_layer=flip_layer, use_segmented_crc=False)
         
         for path in restart_paths:
             u_I = path.bits[code.n, code.info_indices]
-            if check_crc(u_I, POLY_CRC5):
+            if check_full_crc(u_I, code):
                 return u_I, True, attempts
                 
     if len(paths) > 0:
@@ -375,7 +381,7 @@ def decode_ts_sclf(y, code, L=4, T=10, D1=16, D2=3, alpha=0.5, apply_constraint=
     first_round_llrs = {}
     
     decode_node(0, 0, paths, code, L, is_first_round=True, first_round_pms=first_round_pms, 
-                first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=False, flip_layer=-1, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra)
+                first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=False, flip_layer=-1, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra, use_segmented_crc=True)
     
     # Check if initial SCL decoding succeeded
     for path in paths:
@@ -392,12 +398,12 @@ def decode_ts_sclf(y, code, L=4, T=10, D1=16, D2=3, alpha=0.5, apply_constraint=
     attempts = 1
     # --- Flipping Loop (Attempts 1 to T) ---
     for i in range(min(T, len(S))):
-        attempts += 1
-        
         # Check FLIPSKIP
         fout = run_flipskip(S, i, D1, D2)
         if fout == 1:
             continue
+            
+        attempts += 1
             
         # Restart SCL with early termination and bit-flipping at S[i]
         flip_layer = S[i]
@@ -406,7 +412,7 @@ def decode_ts_sclf(y, code, L=4, T=10, D1=16, D2=3, alpha=0.5, apply_constraint=
         restart_paths = [restart_path]
         
         decode_node(0, 0, restart_paths, code, L, is_first_round=False, first_round_pms=first_round_pms,
-                    first_round_llrs=None, alpha=alpha, is_flipping=True, flip_layer=flip_layer, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra)
+                    first_round_llrs=None, alpha=alpha, is_flipping=True, flip_layer=flip_layer, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra, use_segmented_crc=True)
         
         # Check if any path passed final CRC
         for path in restart_paths:
@@ -437,7 +443,7 @@ def decode_adaptive_l_lra_ast(y, code, T=10, D1=16, D2=3, alpha=1.5, apply_const
     first_round_llrs = {}
     
     decode_node(0, 0, paths, code, L_initial, is_first_round=True, first_round_pms=first_round_pms, 
-                first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=False, flip_layer=-1, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra)
+                first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=False, flip_layer=-1, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra, use_segmented_crc=True)
     
     # Check if initial SCL decoding succeeded
     for path in paths:
@@ -471,12 +477,12 @@ def decode_adaptive_l_lra_ast(y, code, T=10, D1=16, D2=3, alpha=1.5, apply_const
     attempts = 1
     # --- Flipping Loop (Attempts 1 to T) ---
     for i in range(min(T, len(S))):
-        attempts += 1
-        
         # Check FLIPSKIP
         fout = run_flipskip(S, i, D1, D2)
         if fout == 1:
             continue
+            
+        attempts += 1
             
         # Restart SCL with early termination and bit-flipping at S[i]
         flip_layer = S[i]
@@ -485,7 +491,7 @@ def decode_adaptive_l_lra_ast(y, code, T=10, D1=16, D2=3, alpha=1.5, apply_const
         restart_paths = [restart_path]
         
         decode_node(0, 0, restart_paths, code, L_restart, is_first_round=False, first_round_pms=first_round_pms,
-                    first_round_llrs=None, alpha=alpha, is_flipping=True, flip_layer=flip_layer, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra)
+                    first_round_llrs=None, alpha=alpha, is_flipping=True, flip_layer=flip_layer, guard_band=guard_band, use_lra_ast=use_lra_ast, gamma_lra=gamma_lra, use_segmented_crc=True)
         
         # Check if any path passed final CRC
         for path in restart_paths:
@@ -529,7 +535,7 @@ def decode_alas_sclf(y, code, T=10, D1=16, D2=3, alpha=1.0, guard_band=8):
     
     decode_node(0, 0, paths, code, L_initial, is_first_round=True, first_round_pms=first_round_pms, 
                 first_round_llrs=first_round_llrs, alpha=alpha, is_flipping=False, flip_layer=-1, 
-                guard_band=guard_band, use_lra_ast=False)
+                guard_band=guard_band, use_lra_ast=False, use_segmented_crc=True)
     
     # Check if initial run succeeded
     for path in paths:
@@ -562,11 +568,12 @@ def decode_alas_sclf(y, code, T=10, D1=16, D2=3, alpha=1.0, guard_band=8):
     
     attempts = 1
     for i in range(min(T, len(S))):
-        attempts += 1
-        
+        # Check FLIPSKIP
         fout = run_flipskip(S, i, D1, D2)
         if fout == 1:
             continue
+            
+        attempts += 1
             
         flip_layer = S[i]
         restart_path = Path(code.n, code.N)
@@ -575,7 +582,7 @@ def decode_alas_sclf(y, code, T=10, D1=16, D2=3, alpha=1.0, guard_band=8):
         
         decode_node(0, 0, restart_paths, code, L_restart, is_first_round=False, first_round_pms=first_round_pms,
                     first_round_llrs=None, alpha=alpha, is_flipping=True, flip_layer=flip_layer, 
-                    guard_band=guard_band, use_lra_ast=False)
+                    guard_band=guard_band, use_lra_ast=False, use_segmented_crc=True)
         
         for path in restart_paths:
             u_I = path.bits[code.n, code.info_indices]
