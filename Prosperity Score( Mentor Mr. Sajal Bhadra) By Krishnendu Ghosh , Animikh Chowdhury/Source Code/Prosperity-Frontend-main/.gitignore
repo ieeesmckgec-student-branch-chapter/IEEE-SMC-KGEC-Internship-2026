@@ -1,0 +1,32 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+
+# Bun specific
+.bun/
+# Keep bun.lock in git, but ignore internal runtime caches if any exist
+
+# Environment variables (Crucial for security!)
+.env
+.env.local
+.env.*.local
+
+# Editor / System configurations
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: prosperityscore-api
+    env: python
+    plan: starter
+    repo: <YOUR_GITHUB_REPO>   
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker scripts.api:app --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: MODEL_PATH
+        value: models/ml_model.pkl
+    healthCheckPath: /health
