@@ -1,9 +1,21 @@
-__pycache__/
-*.py[cod]
-*$py.class
+# Virtual environment
 .venv/
-env/
 venv/
-.idea/
-.vscode/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Logs & model weights (large files — add manually if needed)
+logs/
+model_pth/
