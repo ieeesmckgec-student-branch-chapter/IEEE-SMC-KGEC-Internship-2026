@@ -21,7 +21,7 @@ The project provides a guided user workflow:
 
 ## 🚀 Live Demo
 
-**Frontend:**  
+**Live Application Frontend**  
 https://prosperityscore.vercel.app/
 
 **Backend API:**  
