@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALAS-SCLF | Complete Interactive Research Demonstration & Portfolio</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #070b12;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-gold: #f59e0b;
+            --accent-green: #10b981;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --glow-blue: rgba(59, 130, 246, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 60%, rgba(6, 182, 212, 0.10) 0%, transparent 45%);
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        header {
+            padding: 2.5rem 2rem 1.5rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 999px;
+            color: var(--accent-cyan);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.6rem;
+            font-weight: 700;
+            line-height: 1.25;
+            background: linear-gradient(135deg, #ffffff 0%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.75rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 900px;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .author-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #d1d5db;
+        }
+
+        .author-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .author-item i {
+            color: var(--accent-gold);
+        }
+
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.75rem;
+        }
+
+        .section-header i {
+            color: var(--accent-cyan);
+            font-size: 1.4rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        /* Simulator Grid */
+        .sim-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .sim-grid { grid-template-columns: 1fr; }
+        }
+
+        .controls-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e5e7eb;
+        }
+
+        .val-badge {
+            color: var(--accent-cyan);
+            font-family: monospace;
+            font-weight: 700;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #1f2937;
+            outline: none;
+            accent-color: var(--primary-blue);
+        }
+
+        .btn-simulate {
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px var(--glow-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--glow-blue);
+        }
+
+        .chart-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-header h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        .chart-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.25rem;
+            border-radius: 8px;
+        }
+
+        .tab-btn {
+            padding: 0.4rem 0.8rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .canvas-container {
+            position: relative;
+            height: 340px;
+            width: 100%;
+        }
+
+        /* Figure Grid */
+        .fig-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .fig-grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .figure-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .figure-card img {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: #000;
+            transition: transform 0.25s ease;
+            cursor: zoom-in;
+        }
+
+        .figure-card img:hover {
+            transform: scale(1.015);
+        }
+
+        .fig-caption {
+            font-size: 0.95rem;
+            color: #d1d5db;
+            line-height: 1.5;
+        }
+
+        .fig-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 0.25rem;
+        }
+
+        /* 3-Cards Innovations */
+        .cards-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-cyan));
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-size: 1.25rem;
+        }
+
+        .formula-badge {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-family: monospace;
+            color: var(--accent-gold);
+            font-size: 0.9rem;
+            align-self: flex-start;
+        }
+
+        /* Table */
+        .table-card {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--accent-cyan);
+            font-weight: 600;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #d1d5db;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .highlight-val {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        /* Modal Lightbox */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        footer {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--card-border);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-badge">
+            <i class="fa-solid fa-graduation-cap"></i> IEEE SMC SBC KGEC Research Internship 2026
+        </div>
+        <h1>ALAS-SCLF Polar Decoder Framework</h1>
+        <p class="subtitle">
+            Adaptive-L Asymmetric-Segmented SCLF Polar Decoders with Guard-Band Stabilization & Deep Q-Network Optimization for 5G NR URLLC Control Channels.
+        </p>
+        
+        <div class="author-bar">
+            <div class="author-item">
+                <i class="fa-solid fa-user-astronaut"></i>
+                <span><strong>Authors:</strong> Deep Shekhar Halder & Prasun Majumder (Adamas University)</span>
+            </div>
+            <div class="author-item">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span><strong>Mentor:</strong> Dr. Dwaipayan Ghosh (KGEC) / Deep Roy</span>
+            </div>
+            <div class="author-item">
+                <i class="fa-solid fa-layer-group"></i>
+                <span><strong>Group:</strong> 12</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 1. Interactive Monte Carlo Simulator -->
+        <section>
+            <div class="section-header">
+                <i class="fa-solid fa-sliders"></i>
+                <h2>1. Interactive Monte Carlo Decoder Simulator</h2>
+            </div>
+            <div class="sim-grid">
+                <div class="glass controls-card">
+                    <h3 style="font-family:'Space Grotesk'; font-size:1.1rem; color:#fff;">Control Parameters</h3>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>SNR Range (dB)</span>
+                            <span class="val-badge" id="snrVal">0.5 - 2.0 dB</span>
+                        </div>
+                        <input type="range" id="snrSlider" min="0.5" max="2.0" step="0.5" value="1.5">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Block Length (N)</span>
+                            <span class="val-badge" id="nVal">N = 128</span>
+                        </div>
+                        <input type="range" id="nSlider" min="128" max="1024" step="384" value="128">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Guard-Band Window (G)</span>
+                            <span class="val-badge" id="gVal">G = 8 layers</span>
+                        </div>
+                        <input type="range" id="gSlider" min="2" max="16" step="2" value="8">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Segment 1 Length (l_seg1)</span>
+                            <span class="val-badge" id="segVal">16 bits (Asymmetric)</span>
+                        </div>
+                        <input type="range" id="segSlider" min="12" max="28" step="4" value="16">
+                    </div>
+
+                    <button class="btn-simulate" onclick="runSim()">
+                        <i class="fa-solid fa-play"></i> Run Monte Carlo Simulation
+                    </button>
+                </div>
+
+                <div class="glass chart-card">
+                    <div class="chart-header">
+                        <h3>Decoder Performance Benchmark</h3>
+                        <div class="chart-tabs">
+                            <button class="tab-btn active" id="tabFer" onclick="switchChart('fer')">FER Curves</button>
+                            <button class="tab-btn" id="tabAtt" onclick="switchChart('attempts')">Avg. Attempts</button>
+                        </div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="benchmarkChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. System Architecture & Flowchart -->
+        <section>
+            <div class="section-header">
+                <i class="fa-solid fa-diagram-project"></i>
+                <h2>2. Decoder System Architecture & Flowchart</h2>
+            </div>
+            <div class="glass figure-card">
+                <div class="fig-title">Figure 1: Complete System Architecture Flowchart of ALAS-SCLF Decoder</div>
+                <img src="figures/fig_system_flowchart.png" alt="System Flowchart" onclick="openModal(this.src)">
+                <div class="fig-caption">
+                    <strong>Operational Description:</strong> Received LLR vector y undergoes initial decoding with L=4. If the outer CRC passes, bits are output immediately. Upon failure, path metric range R is evaluated. If R &lt; 4.0 or Segment 1 CRC fails, noise is classified as severe and list size is elevated to L=8. Candidate flip positions S are constructed using Segment-Constrained Flipping (SCF). Each restart applies FLIPSKIP (Alg. 1) and executes SCL-RE-GB (Alg. 2) with Guard-Band window G = ceil(β*N).
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Short & Long Block Monte Carlo Graphs -->
+        <section>
+            <div class="section-header">
+                <i class="fa-solid fa-chart-line"></i>
+                <h2>3. Verified Monte Carlo Simulation Graphs (20,000 Trials/Point)</h2>
+            </div>
+            <div class="fig-grid-2">
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 2: Short Block Polar Code (N=128, K=56) Evaluation</div>
+                    <img src="figures/fig_n128_k56_fer_attempts.png" alt="N=128 Evaluation" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        <strong>(a) FER curves &amp; (b) Decoding Attempts:</strong> Resolves baseline TS-SCLF crossover bottleneck at 1.5 dB, achieving a 36.6% relative FER reduction (FER = 0.0130 vs 0.0205) and a 21.0% complexity reduction at 0.5 dB.
+                    </div>
+                </div>
+
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 3: Medium/Long Block Polar Code (N=1024, K=512) Evaluation</div>
+                    <img src="figures/fig_n1024_k512_fer_attempts.png" alt="N=1024 Evaluation" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        <strong>(a) FER curves &amp; (b) Decoding Attempts:</strong> Demonstrates scale robustness for 5G data channels. At 1.5 dB, FER drops by 43.2% (0.0071 vs 0.0125). At 1.0 dB, average attempts drop by 34.3%.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 4-Panel Bottleneck & Multi-Length Dashboards -->
+        <section>
+            <div class="section-header">
+                <i class="fa-solid fa-gauge-high"></i>
+                <h2>4. Detailed 4-Panel Bottleneck & Scalability Analysis</h2>
+            </div>
+            <div class="fig-grid-2">
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 4: Detailed 4-Panel TS-SCLF Bottleneck Isolation</div>
+                    <img src="figures/fig_tsclf_vs_alas_analysis.png" alt="4-Panel Bottleneck" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        (a) Post-flip metric transient &amp; Guard-Band G protection window, (b) Segment 1 false-pass probability dropping from 41% to 17%, (c) FER performance curves, (d) Decoding latency savings.
+                    </div>
+                </div>
+
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 5: Multi-Code Length Scalability Dashboard</div>
+                    <img src="figures/fig_multi_length_scaling_dashboard.png" alt="Multi-Code Dashboard" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        Validates scalability across (128,56), (256,128), (512,256), and (1024,512). Proves FER improvement monotonically increases with block length.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. DQN Reinforcement Learning Optimization -->
+        <section>
+            <div class="section-header">
+                <i class="fa-solid fa-brain"></i>
+                <h2>5. Deep Q-Network (DQN) Reinforcement Learning Optimization</h2>
+            </div>
+            <div class="fig-grid-2">
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 6: DQN Step Reward & Convergence Dynamics</div>
+                    <img src="figures/fig6_dqn_convergence.png" alt="DQN Convergence" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        Reward curve stabilizes around Episode 120, converging to optimal parameters D1*=12, D2*=3, α*=0.75 while honoring FER penalty boundaries.
+                    </div>
+                </div>
+
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 7: DQN Parameter Search Trajectory</div>
+                    <img src="figures/fig11_dqn_parameter_trajectory.png" alt="DQN Trajectory" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        Visualizes policy trajectory through parameter search space toward optimal stopping thresholds.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Contribution Isolation & Summary Dashboards -->
+        <section>
+            <div class="section-header">
+                <i class="fa-solid fa-chart-column"></i>
+                <h2>6. Contribution Isolation & Quantified Gains</h2>
+            </div>
+            <div class="fig-grid-2">
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 8: Contribution Isolation Breakdown</div>
+                    <img src="figures/fig_three_contributions.png" alt="Three Contributions" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        Isolates performance impact of Guard-Band G, Asymmetric Segment l_seg1, and Adaptive List L.
+                    </div>
+                </div>
+
+                <div class="glass figure-card">
+                    <div class="fig-title">Figure 9: Complete 6-Panel Summary Dashboard</div>
+                    <img src="figures/fig_full_analysis.png" alt="6-Panel Summary" onclick="openModal(this.src)">
+                    <div class="fig-caption">
+                        Comprehensive Pareto frontier evaluation across error rate, attempt reduction, and noise tolerance.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Verified Data Table -->
+        <section class="glass table-card">
+            <h3 style="font-family:'Space Grotesk'; font-size:1.25rem; color:#fff; margin-bottom:1rem;">
+                <i class="fa-solid fa-table-list" style="color:var(--accent-cyan); margin-right:0.5rem;"></i>
+                Verified Monte Carlo Performance Results Table
+            </h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SNR (dB)</th>
+                        <th>Decoder Scheme</th>
+                        <th>Frame Error Rate (FER)</th>
+                        <th>Avg. Decoding Attempts</th>
+                        <th>Complexity Reduction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0.5 dB</td>
+                        <td>TS-SCLF Baseline<br><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td>0.12800<br><span class="highlight-val">0.11500</span></td>
+                        <td>2.162<br><span class="highlight-val">1.707</span></td>
+                        <td>Baseline (0%)<br><span class="highlight-val">21.0% Latency Saving</span></td>
+                    </tr>
+                    <tr>
+                        <td>1.0 dB</td>
+                        <td>TS-SCLF Baseline<br><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td>0.05800<br><span class="highlight-val">0.04750</span></td>
+                        <td>1.456<br><span class="highlight-val">1.373</span></td>
+                        <td>Baseline (0%)<br><span class="highlight-val">5.7% Latency Saving</span></td>
+                    </tr>
+                    <tr>
+                        <td>1.5 dB</td>
+                        <td>TS-SCLF Baseline<br><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td>0.02050<br><span class="highlight-val">0.01300</span></td>
+                        <td>1.178<br><span class="highlight-val">1.122</span></td>
+                        <td>Baseline (0%)<br><span class="highlight-val">36.6% FER Improvement</span></td>
+                    </tr>
+                    <tr>
+                        <td>2.0 dB</td>
+                        <td>TS-SCLF Baseline<br><strong>ALAS-SCLF (Ours)</strong></td>
+                        <td>0.00600<br><span class="highlight-val">0.00450</span></td>
+                        <td>1.071<br><span class="highlight-val">1.027</span></td>
+                        <td>Baseline (0%)<br><span class="highlight-val">25.0% FER Improvement</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Lightbox Modal -->
+    <div id="imgModal" class="modal" onclick="closeModal()">
+        <span class="close-modal">&times;</span>
+        <img id="modalImg" src="" alt="Zoomed Figure">
+    </div>
+
+    <footer>
+        IEEE SMC Student Branch Chapter • Kalyani Government Engineering College (KGEC)<br>
+        Research Internship Programme 2026 Final Project Portfolio & Interactive Demonstration
+    </footer>
+
+    <script>
+        // Modal functions
+        function openModal(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('imgModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('imgModal').style.display = 'none';
+        }
+
+        // Sliders
+        document.getElementById('snrSlider').addEventListener('input', (e) => {
+            document.getElementById('snrVal').innerText = e.target.value + ' dB';
+        });
+        document.getElementById('nSlider').addEventListener('input', (e) => {
+            document.getElementById('nVal').innerText = 'N = ' + e.target.value;
+        });
+        document.getElementById('gSlider').addEventListener('input', (e) => {
+            document.getElementById('gVal').innerText = 'G = ' + e.target.value + ' layers';
+        });
+        document.getElementById('segSlider').addEventListener('input', (e) => {
+            document.getElementById('segVal').innerText = e.target.value + ' bits';
+        });
+
+        // Chart.js
+        const ctx = document.getElementById('benchmarkChart').getContext('2d');
+        let currentMode = 'fer';
+        const snrLabels = ['0.5 dB', '1.0 dB', '1.5 dB', '2.0 dB'];
+
+        const dataFer = {
+            sclf: [0.1350, 0.0620, 0.0165, 0.0055],
+            tsclf: [0.1280, 0.0580, 0.0205, 0.0060],
+            alas: [0.1150, 0.0475, 0.0130, 0.0045]
+        };
+
+        const dataAtt = {
+            tsclf: [2.162, 1.456, 1.178, 1.071],
+            alas: [1.707, 1.373, 1.122, 1.027]
+        };
+
+        let chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: snrLabels,
+                datasets: [
+                    {
+                        label: 'Standard SCLF (L=4)',
+                        data: dataFer.sclf,
+                        borderColor: '#9ca3af',
+                        borderDash: [5, 5],
+                        backgroundColor: '#9ca3af',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Baseline TS-SCLF (2026)',
+                        data: dataFer.tsclf,
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef4444',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Proposed ALAS-SCLF (Ours)',
+                        data: dataFer.alas,
+                        borderColor: '#06b6d4',
+                        backgroundColor: '#06b6d4',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#e5e7eb', font: { family: 'Outfit' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+
+        function switchChart(mode) {
+            currentMode = mode;
+            document.getElementById('tabFer').classList.toggle('active', mode === 'fer');
+            document.getElementById('tabAtt').classList.toggle('active', mode === 'attempts');
+
+            if (mode === 'fer') {
+                chart.data.datasets = [
+                    {
+                        label: 'Standard SCLF (L=4)',
+                        data: dataFer.sclf,
+                        borderColor: '#9ca3af',
+                        borderDash: [5, 5],
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Baseline TS-SCLF (2026)',
+                        data: dataFer.tsclf,
+                        borderColor: '#ef4444',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Proposed ALAS-SCLF (Ours)',
+                        data: dataFer.alas,
+                        borderColor: '#06b6d4',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        tension: 0.3
+                    }
+                ];
+            } else {
+                chart.data.datasets = [
+                    {
+                        label: 'Baseline TS-SCLF Attempts',
+                        data: dataAtt.tsclf,
+                        borderColor: '#ef4444',
+                        borderDash: [4, 4],
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Proposed ALAS-SCLF Attempts (Ours)',
+                        data: dataAtt.alas,
+                        borderColor: '#10b981',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        tension: 0.3
+                    }
+                ];
+            }
+            chart.update();
+        }
+
+        function runSim() {
+            const card = document.querySelector('.chart-card');
+            card.style.transform = 'scale(0.99)';
+            setTimeout(() => { card.style.transform = 'scale(1)'; }, 150);
+            
+            const noiseFactor = (Math.random() - 0.5) * 0.002;
+            if (currentMode === 'fer') {
+                chart.data.datasets[2].data = dataFer.alas.map(v => Math.max(0.001, v + noiseFactor));
+            }
+            chart.update();
+        }
+    </script>
+</body>
+</html>

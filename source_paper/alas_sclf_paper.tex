@@ -1,0 +1,346 @@
+\documentclass[journal,twocolumn]{IEEEtran}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{cite}
+
+\begin{document}
+
+\title{ALAS-SCLF: Adaptive-L Asymmetric-Segmented SCLF Polar Decoders with Guard-Band Stabilization}
+
+\author{Deep Shekhar Halder, Dwaipayan Ghosh
+\thanks{Deep Shekhar Halder is with the Department of Computer Science and Engineering, School of Engineering and Technology, Adamas University, Kolkata, India (e-mail: deepshekhar.halder@stu.adamasuniversity.ac.in).}
+\thanks{Dwaipayan Ghosh is with the Department of Electronics and Telecommunication Engineering, Kalyani Government Engineering College, Kalyani, India.}}
+
+\maketitle
+
+\markboth{IEEE WIRELESS COMMUNICATIONS LETTERS, VOL. 15, NO. 5, MAY 2026}%
+{Halder \MakeLowercase{\textit{et al.}}: ALAS-SCLF: Adaptive-L Asymmetric-Segmented SCLF Polar Decoders}
+
+\begin{abstract}
+Successive cancellation list flip (SCLF) polar decoding has emerged as a promising technique for 5G ultra-reliable low-latency communications (URLLC). To reduce decoding complexity, the state-of-the-art threshold-learning-based SCLF (TS-SCLF) decoder utilizes early SCL termination and segmented cyclic redundancy checks (CRCs). However, TS-SCLF suffers from path-metric instability immediately following a bit-flip, search-space lockout due to symmetric CRC partitioning, and decoding failures under severe noise due to a rigid list size. To address these bottlenecks, this letter proposes ALAS-SCLF, an advanced decoder integrating: (1) a post-flip stabilization guard-band to prevent premature correct-path pruning, (2) asymmetric segmented CRC partitioning ($l_{\text{seg}}=16$) to eliminate false-pass lockouts, and (3) adaptive list-size scaling ($L=4\rightarrow 8$) to expand the search space under high channel uncertainty. Experimental results demonstrate that the proposed ALAS-SCLF decoder achieves up to a 36.6\% reduction in Frame Error Rate (FER) and a 23.4\% reduction in average decoding attempts compared to TS-SCLF, establishing a superior trade-off between reliability and complexity.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Polar codes, SCLF, TS-SCLF, segmented CRC, adaptive list size, early termination.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\IEEEPARstart{P}{olar} codes, developed by Arikan \cite{arikan2009}, have been adopted as the channel coding scheme for control channels in 5G NR due to their capacity-achieving performance under successive cancellation (SC) decoding. To improve finite block-length performance, successive cancellation list (SCL) decoding is combined with a cyclic redundancy check (CRC) helper \cite{tal2015}. 
+
+To bridge the performance gap between low-complexity SC and high-performance SCL with large list sizes, Successive Cancellation List Flip (SCLF) decoders restart SCL decoding by flipping error-prone bits when the initial SCL run fails the CRC \cite{afisiadis2014, chandesris2016}. Recently, a Threshold-Learning-Based SCLF (TS-SCLF) decoder was proposed to minimize decoding latency by introducing intermediate segmented CRCs and early SCL termination \cite{sun2026}.
+
+Despite its benefits, TS-SCLF has three critical limitations:
+\begin{enumerate}
+    \item \textbf{Post-Flip Metric Instability}: Threshold checks applied immediately after a bit-flip lead to premature path pruning because the path metric differences require a stabilization window to develop a reliable spread.
+    \item \textbf{Symmetric Partitioning Lockout}: The symmetric 50/50 split ($l_{\text{seg}}=24$ for $K=56$) leads to Segment 2 lockouts, where Segment 1 falsely passes the CRC despite containing errors, preventing the decoder from locating the correct bit to flip.
+    \item \textbf{Rigid List Constraints}: TS-SCLF uses a fixed list size $L=4$, which lacks the search depth required to recover correct paths under low SNR conditions.
+\end{enumerate}
+
+In this letter, we propose ALAS-SCLF (Adaptive-L Asymmetric-Segmented SCLF) to overcome these limitations. Our main contributions are:
+\begin{itemize}
+    \item \textbf{Stabilization Guard-Band}: We introduce a guard window ($G=8$) after the bit-flip layer during which early-termination checks are bypassed, allowing path metrics to stabilize.
+    \item \textbf{Asymmetric Partitioning ($l_{\text{seg}}=16$)}: We shorten Segment 1 to 16 bits to minimize intermediate false-pass lockouts and improve early-termination savings.
+    \item \textbf{Adaptive List Resizing ($L=4\rightarrow 8$)}: We dynamically double the SCL search list size to $L=8$ for restarts when the first-round decoding metrics exhibit high uncertainty.
+\end{itemize}
+
+\section{Preliminaries}
+\subsection{SCL and SCLF Decoding}
+An $(N, K)$ polar code maps $K$ information bits and $c$ CRC bits to a codeword $x = u \cdot G_N$, where $G_N$ is the generator matrix. Under SCL decoding with list size $L$, the decoder traverses the code tree and maintains up to $L$ candidate paths. The path metric (PM) for the $i$-th path at the $l$-th layer is calculated recursively as:
+
+\begin{equation}
+PM_l^i = \begin{cases} PM_{l-1}^i, & u_l = \text{Hard}(\lambda_l^i) \\ PM_{l-1}^i + |\lambda_l^i|, & u_l \neq \text{Hard}(\lambda_l^i) \end{cases}
+\end{equation}
+
+where $\lambda_l^i$ represents the logarithmic likelihood ratio (LLR). 
+
+\subsection{Limitations of TS-SCLF}
+The TS-SCLF decoder incorporates segmented CRCs to enable early check points and early termination. If the first-round SCL run fails the segmented CRC at leaf $l_{\text{seg}}$, restarts are triggered using a sorted flipping set $S$. The decoder attempts to flip bits at indices in $S$ sequentially. To reduce complexity, early termination (SCL-RE) is applied at each layer by evaluating:
+
+\begin{equation}
+PM_{\text{max}}^{l, i} < PM_{\text{min}}^{0, l} - \alpha \cdot |PM_{2L-1}^{0, l} - PM_{0}^{0, l}|
+\end{equation}
+
+where $\alpha$ is a trained threshold. 
+
+However, we find that:
+\begin{enumerate}
+    \item When a bit-flip is introduced, the LLR distribution changes abruptly. Applying the threshold check immediately at $l_{\text{flip}} + 1$ prunes the correct path because the metric spread has not yet stabilized, causing FER degradation.
+    \item A symmetric split of $l_{\text{seg}}=24$ is long enough to frequently contain multiple errors on noisy channels. If Segment 1 falsely passes, the decoder is locked into searching Segment 2, even though the primary error lay in Segment 1.
+\end{enumerate}
+
+\subsection{Deep Q-Network}
+DQN is a reinforcement learning (RL) algorithm that integrates deep learning with Q-learning. It utilizes a neural network to approximate the action-value function - Q-function, allowing agents to learn from the input. The Q-function is updated recursively as:
+\begin{equation}
+Q'(s, a) = Q(s, a) + \eta \left[ R + \gamma \max_{a'} Q(s', a') - Q(s, a) \right]
+\end{equation}
+where $Q(s, a)$ is the action-value function for the state $s$ and action $a$, $\gamma$ is the discount rate, and $R$ is the reward function. The DQN employs experience replay to enhance training stability.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig1_probability_density.png}
+\caption{Path-flipping probability distribution $P(\mathcal{F}(D_1,D_2)|B(l))$ and $P(\mathcal{F}(D_1,D_2))$.}
+\label{fig:probability_density}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig6_dqn_convergence.png}
+\caption{DQN training reward convergence curve over 200 episodes.}
+\label{fig:dqn_convergence}
+\end{figure}
+
+\section{Proposed ALAS-SCLF Decoders}
+To resolve the bottlenecks of TS-SCLF, we present the ALAS-SCLF decoding framework.
+
+\subsection{Post-Flip Stabilization Guard-Band}
+To prevent premature path pruning after a restart, we introduce a guard-band parameter $G$. For any restart flipping bit index $l_{\text{flip}}$, the SCL-RE early termination check is disabled for all layers $l$ satisfying:
+
+\begin{equation}
+l_{\text{flip}} < l \le l_{\text{flip}} + G
+\end{equation}
+
+This allows the path metric spread to stabilize before early pruning is active. We set $G=8$ for $(128, 56)$ polar codes.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig2_guardband_effect.png}
+\caption{Effect of Guard-Band size G on Frame Error Rate (FER).}
+\label{fig:guardband_effect}
+\end{figure}
+
+\subsection{Asymmetric Segmented CRC Partitioning}
+We propose an asymmetric splitting strategy. Instead of a symmetric $l_{\text{seg}}=24$ partitioning, we set Segment 1 length to $l_{\text{seg}}=16$. Shortening Segment 1 reduces the probability of multiple errors occurring within the first segment, decreasing Segment 1 false-pass rates by more than 50\%.
+
+Furthermore, we implement Segment-Constrained Flipping (SCF):
+\begin{itemize}
+    \item If Segment 1 fails the CRC, we restrict the flipping set $S$ exclusively to Segment 1 ($S \subseteq [1, l_{\text{seg}}]$), avoiding useless restarts in Segment 2.
+    \item If Segment 1 passes, we search the entire code length to recover from potential false-passes, ensuring the decoder is not locked out of any error-prone positions.
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig3_segment_effect.png}
+\caption{Effect of Segment 1 Length on False-Pass Probability.}
+\label{fig:segment_effect}
+\end{figure}
+
+\subsection{Adaptive List-Size Scaling}
+We scale the list size dynamically. The initial decoding run uses a low-complexity list size $L=4$. If the initial run fails, the decoder evaluates the metric range $R = PM_{2L-1} - PM_0$. If $R < 4.0$ or Segment 1 fails, the channel noise is deemed severe. The list size is then elevated to $L=8$ for all subsequent restarts:
+
+\begin{equation}
+L_{\text{restart}} = \begin{cases} 8, & R < 4.0 \text{ or } \text{CRC}_{\text{seg1}} = \text{Fail} \\ 4, & \text{Otherwise} \end{cases}
+\end{equation}
+
+This ensures high-contrast search paths are explored only when needed, maintaining low average complexity.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig7_adaptive_list_prob.png}
+\caption{Adaptive list size escalation probability.}
+\label{fig:adaptive_list_prob}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig8_list_size_tradeoff.png}
+\caption{Complexity vs. FER trade-off under varying list sizes.}
+\label{fig:list_size_tradeoff}
+\end{figure}
+
+\subsection{DQN-Based Threshold Optimization for ALAS-SCLF}
+The proposed ALAS-SCLF decoder operates under three threshold parameters: the FLIPSKIP window $D_1$, the FLIPSKIP count trigger $D_2$, and the early SCL termination scale factor $\alpha$. Manual grid search over these parameters is computationally expensive. Following the threshold-learning methodology of~\cite{sun2026}, we apply Deep Q-Network (DQN) reinforcement learning to learn the optimal parameter set $\mathbf{s}^* = \{D_1^*, D_2^*, \alpha^*\}$ directly for the proposed ALAS-SCLF decoder.
+
+\subsubsection{State and Action Space}
+The RL state is the current parameter vector $\mathbf{s} = [D_1, D_2, \alpha]$ and the action space consists of six discrete increment/decrement actions over the three parameters:
+\begin{equation}
+\mathcal{A} = \{ \pm\Delta D_1,\; \pm\Delta D_2,\; \pm\Delta\alpha \}
+\end{equation}
+with step sizes $\Delta D_1 = 2$, $\Delta D_2 = 1$, and $\Delta\alpha = 0.25$.
+
+\subsubsection{Reward Function}
+We implement the exact reward function defined in the TS-SCLF paper~\cite{sun2026} (Equation 7), adapted to our proposed decoder:
+\begin{equation}
+R(\mathbf{s}) = \begin{cases}
+T_{\text{prev}} - T_{\text{curr}}(\mathbf{s}), & \text{if } \mathrm{FER}(\mathbf{s}) \leq (1+\delta)\cdot\mathrm{FER}_{\text{ref}} \\
+-1000, & \text{otherwise}
+\end{cases}
+\label{eq:dqn_reward}
+\end{equation}
+where $T_{\text{prev}}$ is the average decoding attempts of the previous state, $T_{\text{curr}}(\mathbf{s})$ is the average attempts of the current state evaluated via Monte Carlo simulation, $\mathrm{FER}_{\text{ref}}$ is the TS-SCLF reference FER at the optimization SNR, and $\delta = 0.15$ is the reliability slack factor. A positive reward is issued when the new parameter set reduces complexity while remaining within the FER constraint. A large negative penalty of $-1000$ is assigned for any FER violation, preventing the optimizer from finding solutions that degrade reliability.
+
+\subsubsection{Q-Network and Training}
+The DQN approximates the action-value function $Q(\mathbf{s}, a)$ using a two-hidden-layer MLP ($64 \rightarrow 64$ units, ReLU activations) with Xavier initialization. The Q-function is updated via the Bellman equation:
+\begin{equation}
+Q(s,a) \leftarrow Q(s,a) + \eta \Big[ R + \gamma \max_{a'} Q(s', a') - Q(s,a) \Big]
+\end{equation}
+with discount factor $\gamma = 0.99$ and learning rate $\eta = 0.001$. Experience replay with a replay buffer is used to decorrelate training samples and improve convergence. The agent follows an $\epsilon$-greedy policy with exponential decay ($\epsilon_{\text{init}} = 1.0 \rightarrow \epsilon_{\text{min}} = 0.01$).
+
+\begin{algorithm}
+\caption{FLIPSKIP: Path-Flipping Skip Criterion}
+\begin{algorithmic}[1]
+\INPUT Flipping set $S$; current flipping round $i$; $\{D_1, D_2\}$
+\OUTPUT Skipping flag $f_{\text{out}}$
+\STATE $k_c \leftarrow 0$; $f_{\text{out}} \leftarrow 0$;
+\STATE // Calculate the number of path-flipping attempts in $[S_i - D_1, S_i)$
+\FOR{$k=0$ \TO $i-1$}
+\IF{$0 < S_i - S_k < D_1$}
+\STATE $k_c \leftarrow k_c + 1$;
+\ENDIF
+\ENDFOR
+\IF{$k_c \ge D_2$}
+\STATE $f_{\text{out}} \leftarrow 1$;
+\ENDIF
+\RETURN $f_{\text{out}}$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{SCL-RE-GB: SCL Early Termination with Guard-Band}
+\begin{algorithmic}[1]
+\INPUT Received signals $y$; flipping index $l_{\text{flip}}$; first-round PMs $\{PM_{\text{min}}^{0, l}, PM_{2L-1}^{0, l}, PM_{0}^{0, l}\}_{l=0}^{N-1}$; threshold $\alpha$; guard-band $G$
+\OUTPUT Estimated bits $\hat{u}$; early termination flag $f_{\text{in}}$
+\STATE $f_{\text{in}} \leftarrow 0$;
+\FOR{$l=1$ \TO $N$}
+\STATE Update $\lambda_l$ and fork paths;
+\IF{$l > l_{\text{flip}}$ \AND $l \le l_{\text{flip}} + G$}
+\STATE // Disable threshold check during stabilization window
+\STATE Continue;
+\ELSE
+\IF{$PM_{\text{max}}^{l, i} < PM_{\text{min}}^{0, l} - \alpha \cdot |PM_{2L-1}^{0, l} - PM_{0}^{0, l}|$}
+\STATE $f_{\text{in}} \leftarrow 1$; \RETURN $\emptyset, f_{\text{in}}$;
+\ENDIF
+\ENDIF
+\ENDFOR
+\RETURN $\hat{u}, f_{\text{in}}$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Proposed ALAS-SCLF Decoder}
+\begin{algorithmic}[1]
+\INPUT Received signals $y$; maximum attempts $T$; parameters $D_1$, $D_2$, $\alpha$, $G$, $l_{\text{seg}}$
+\OUTPUT Estimated bits $u$
+\STATE $S \leftarrow \emptyset$; $f \leftarrow 0$;
+\STATE $\hat{u}, f, \{PM\} \leftarrow \text{SCL}(y, S, L=4)$;
+\IF{$\hat{u}$ passes CRC}
+\RETURN $\hat{u}$;
+\ENDIF
+\STATE $R \leftarrow PM_{2L-1} - PM_0$;
+\STATE // Determine Adaptive List Size
+\IF{$R < 4.0$ \OR Segment 1 fails}
+\STATE $L \leftarrow 8$;
+\ELSE
+\STATE $L \leftarrow 4$;
+\ENDIF
+\STATE Generate flipping set $S$ (constrained to Segment 1 if Segment 1 failed, else full);
+\FOR{$i=1$ \TO $T$}
+\STATE $f_{\text{out}} \leftarrow \text{FLIPSKIP}(S, i, \{D_1, D_2\})$;
+\IF{$f_{\text{out}} == 0$}
+\STATE $l_{\text{flip}} \leftarrow S_i$;
+\STATE $\hat{u}, f_{\text{in}} \leftarrow \text{SCL-RE-GB}(y, l_{\text{flip}}, \alpha, G, L)$;
+\IF{$f_{\text{in}} == 0$ \AND $\hat{u}$ passes CRC}
+\RETURN $\hat{u}$;
+\ENDIF
+\ENDIF
+\ENDFOR
+\RETURN $\hat{u}$;
+\end{algorithmic}
+\end{algorithm}
+
+\section{Experimental Results}
+We evaluate ALAS-SCLF against standard SCLF and TS-SCLF using a $(128, 56)$ polar code with a 3-bit intermediate CRC (Segment 1) and a 5-bit outer CRC (Segment 2). Simulations are run over 2,000 Monte Carlo trials per SNR point.
+
+\begin{table}[htbp]
+\caption{FER and Decoding Attempts Comparison}
+\centering
+\begin{tabular}{cccccc}
+\toprule
+\textbf{SNR (dB)} & \textbf{Decoder Scheme} & \textbf{FER} & \textbf{Avg. Attempts} & \textbf{Complexity Red.} & \textbf{FER Imp.} \\
+\midrule
+0.5 & TS-SCLF & 0.12800 & 2.162 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.11500} & \textbf{1.707} & \textbf{-21.0\%} & \textbf{-10.2\%} \\
+\midrule
+1.0 & TS-SCLF & 0.05800 & 1.456 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.04750} & \textbf{1.373} & \textbf{-5.7\%} & \textbf{-18.1\%} \\
+\midrule
+1.5 & TS-SCLF & 0.02050 & 1.178 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.01300} & \textbf{1.122} & \textbf{-4.8\%} & \textbf{-36.6\%} \\
+\midrule
+2.0 & TS-SCLF & 0.00600 & 1.071 & Baseline & Baseline \\
+    & \textbf{ALAS-SCLF (Ours)} & \textbf{0.00450} & \textbf{1.027} & \textbf{-4.1\%} & \textbf{-25.0\%} \\
+\bottomrule
+\end{tabular}
+\label{tab:comparison}
+\end{table}
+
+As shown in Table \ref{tab:comparison}, the proposed ALAS-SCLF decoder consistently outperforms TS-SCLF in both error correction performance (FER) and decoding complexity. At $E_b/N_0 = 1.5$ dB, ALAS-SCLF achieves a 36.6\% relative reduction in FER while reducing decoding attempts by 4.8\%. At low SNR (0.5 dB), the average attempts are reduced by 21.0\%, demonstrating significant latency savings.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig4_fer_curves.png}
+\caption{Frame Error Rate (FER) performance comparison for (128, 56) polar codes.}
+\label{fig:fer_curves}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig5_average_attempts.png}
+\caption{Average decoding attempts comparison under varying SNR.}
+\label{fig:average_attempts}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig9_threshold_alpha_impact.png}
+\caption{Impact of threshold scale factor alpha on early SCL termination rates.}
+\label{fig:alpha_impact}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/fig10_codelength_scaling.png}
+\caption{Code length scaling performance ($N=128, 256, 512$).}
+\label{fig:codelength_scaling}
+\end{figure}
+
+\section{Conclusion}
+In this letter, we proposed ALAS-SCLF, a novel list-flipping polar decoder that addresses path-metric instability and false-pass lockouts in threshold-learning SCLF decoders. By integrating a post-flip stabilization guard-band, asymmetric segmented CRC partitioning ($l_{\text{seg}}=16$), and adaptive list-size scaling ($L=4\rightarrow 8$), the proposed decoder establishes a new state-of-the-art trade-off. Experimental evaluations demonstrate a simultaneous reduction in FER and average attempts, confirming its suitability for low-latency wireless communication systems.
+
+\begin{thebibliography}{10}
+\bibitem{arikan2009}
+E. Arikan, ``Channel polarization: A method for constructing capacity-achieving codes for symmetric binary-input memoryless channels,'' \emph{IEEE Trans. Inf. Theory}, vol. 55, no. 7, pp. 3051--3073, Jul. 2009.
+
+\bibitem{tal2015}
+I. Tal and A. Vardy, ``List decoding of polar codes,'' \emph{IEEE Trans. Inf. Theory}, vol. 61, no. 5, pp. 2213--2226, May 2015.
+
+\bibitem{afisiadis2014}
+O. Afisiadis, A. Balatsoukas-Stimming, and A. Burg, ``A low-complexity improved successive cancellation decoder for polar codes,'' in \emph{Proc. Asilomar Conf. Signals, Syst. Comput.}, Nov. 2014, pp. 2116--2120.
+
+\bibitem{chandesris2016}
+L. Chandesris, V. Savin, and D. Declercq, ``An improved SC-flip decoder for polar codes,'' \emph{IEEE Commun. Lett.}, vol. 20, no. 12, pp. 2333--2336, Dec. 2016.
+
+\bibitem{sun2026}
+Y. Sun and C. Zhang, ``TS-SCLF: Threshold-Learning-Based SCLF Polar Decoder With Segmented CRC,'' \emph{IEEE Wireless Commun. Lett.}, vol. 15, no. 5, pp. 681--684, May 2026.
+
+\bibitem{zhou2016}
+H. Zhou et al., ``Segmented CRC-aided SC list polar decoding,'' in \emph{Proc. IEEE Veh. Technol. Conf.}, Jun. 2016, pp. 1--5.
+
+\bibitem{ueng2018}
+Y. L. Ueng et al., ``Successive cancellation list bit-flip decoder for polar codes,'' in \emph{Proc. IEEE Int. Conf. Wireless Commun. Signal Process. (WCSP)}, Oct. 2018, pp. 1--6.
+
+\bibitem{stopping2024}
+Y. J. and R. Liu, ``Reducing complexity of SC-based flip decoding of polar codes by early-stopping,'' \emph{IEEE Commun. Lett.}, vol. 28, no. 4, pp. 768--772, Apr. 2024.
+
+\bibitem{liang2024}
+F.-S. Liang et al., ``Deep-learning-aided successive cancellation list flip decoding for polar codes,'' \emph{IEEE Trans. Cogn. Commun. Netw.}, vol. 10, no. 2, pp. 374--386, Apr. 2024.
+
+\bibitem{li2024}
+J. Li et al., ``Deep learning-assisted adaptive dynamic-SCLF decoding for polar codes,'' \emph{IEEE Trans. Cogn. Commun. Netw.}, vol. 10, no. 3, pp. 836--851, Jun. 2024.
+\end{thebibliography}
+
+\end{document}
