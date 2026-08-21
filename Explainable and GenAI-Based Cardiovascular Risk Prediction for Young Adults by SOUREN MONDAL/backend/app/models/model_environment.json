@@ -1,0 +1,7 @@
+{
+    "python_version": "3.12.13",
+    "scikit_learn_version": "1.6.1",
+    "xgboost_version": "3.3.0",
+    "pandas_version": "2.2.2",
+    "numpy_version": "2.0.2"
+}
