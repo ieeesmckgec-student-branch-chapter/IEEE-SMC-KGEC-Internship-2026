@@ -429,18 +429,6 @@ The project was tested across multiple stages, including:
 
 ProsperityScore demonstrates an end-to-end pipeline for **alternative credit assessment using bank transaction data**. The system combines financial data processing, feature engineering, scoring logic, explainability, API development, and an interactive frontend to transform a raw bank statement into a structured financial assessment.
 
----
 
-## 👨‍💻 Team
-
-| Name                  | Role                |
-| --------------------- | ------------------- | ---------------------------------------------------------------- |
-| **Krishnendu Ghosh**  | Project Team Member | BTech AIML Final Year Supreme Knowledge Foundation , Chandanagar |
-| **Animikh Chowdhury** | Project Team Member | B.Sc Computer Science 2nd Year St Xavier Autonomus Kolkata       |
-
-2
-**Mentor:** Sajal Bhadra
-
----
 
 ⭐ If you find this project interesting, consider giving the repository a star!
