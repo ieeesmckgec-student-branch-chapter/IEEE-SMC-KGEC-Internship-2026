@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        SwiFT Crop Recommendation System
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+<!-- =====================================================
+     NAVBAR
+====================================================== -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        🌱 SwiFT
+    </div>
+
+    <div class="nav-title">
+        Crop Recommendation System
+    </div>
+
+</nav>
+
+
+<!-- =====================================================
+     HERO SECTION
+====================================================== -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <span class="badge">
+            AI-Powered Agriculture
+        </span>
+
+        <h1>
+            Smart Crop<br>
+            Recommendation
+        </h1>
+
+        <p>
+            Enter your soil and environmental conditions
+            to receive an AI-based crop recommendation
+            using the SwiFT model.
+        </p>
+
+        <a href="#prediction" class="hero-button">
+            Start Prediction
+        </a>
+
+    </div>
+
+
+    <div class="hero-icon">
+
+        <div class="plant-circle">
+            🌾
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MAIN PREDICTION SECTION
+====================================================== -->
+
+<section
+    class="prediction-section"
+    id="prediction"
+>
+
+    <div class="section-heading">
+
+        <span class="small-heading">
+            CROP PREDICTION
+        </span>
+
+        <h2>
+            Enter Agricultural Parameters
+        </h2>
+
+        <p>
+            Provide the seven parameters used by the
+            trained SwiFT crop recommendation model.
+        </p>
+
+    </div>
+
+
+    <div class="prediction-card">
+
+        <form id="predictionForm">
+
+
+            <!-- =========================================
+                 SOIL PARAMETERS
+            ========================================== -->
+
+            <div class="form-section">
+
+                <h3>
+                    🌱 Soil Parameters
+                </h3>
+
+                <div class="form-grid">
+
+
+                    <div class="input-group">
+
+                        <label for="nitrogen">
+                            Nitrogen (N)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="nitrogen"
+                            name="nitrogen"
+                            placeholder="e.g. 90"
+                            min="0"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label for="phosphorus">
+                            Phosphorus (P)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="phosphorus"
+                            name="phosphorus"
+                            placeholder="e.g. 42"
+                            min="0"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label for="potassium">
+                            Potassium (K)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="potassium"
+                            name="potassium"
+                            placeholder="e.g. 43"
+                            min="0"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label for="ph">
+                            Soil pH
+                        </label>
+
+                        <input
+                            type="number"
+                            id="ph"
+                            name="ph"
+                            placeholder="e.g. 6.5"
+                            min="0"
+                            max="14"
+                            step="0.01"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 ENVIRONMENTAL PARAMETERS
+            ========================================== -->
+
+            <div class="form-section">
+
+                <h3>
+                    ☀️ Environmental Parameters
+                </h3>
+
+                <div class="form-grid">
+
+
+                    <div class="input-group">
+
+                        <label for="temperature">
+                            Temperature (°C)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="temperature"
+                            name="temperature"
+                            placeholder="e.g. 25"
+                            step="0.01"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label for="humidity">
+                            Humidity (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="humidity"
+                            name="humidity"
+                            placeholder="e.g. 80"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <label for="rainfall">
+                            Rainfall (mm)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="rainfall"
+                            name="rainfall"
+                            placeholder="e.g. 200"
+                            min="0"
+                            step="0.01"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 SUBMIT BUTTON
+            ========================================== -->
+
+            <button
+                type="submit"
+                class="predict-button"
+                id="predictButton"
+            >
+
+                <span id="buttonText">
+                    🌱 Recommend Crop
+                </span>
+
+            </button>
+
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     RESULT SECTION
+====================================================== -->
+
+<section
+    class="result-section"
+    id="resultSection"
+>
+
+    <div class="result-card">
+
+        <div class="result-icon">
+            🌾
+        </div>
+
+        <span class="result-label">
+            RECOMMENDED CROP
+        </span>
+
+        <h2 id="cropResult">
+            —
+        </h2>
+
+        <div class="confidence-container">
+
+            <span>
+                Prediction Confidence
+            </span>
+
+            <strong id="confidenceResult">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="confidence-bar">
+
+            <div
+                class="confidence-fill"
+                id="confidenceFill"
+            ></div>
+
+        </div>
+
+
+        <div class="result-message">
+
+            <p id="resultMessage">
+                Enter your agricultural parameters
+                to receive a recommendation.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+
+<footer>
+
+    <div>
+        🌱 SwiFT Crop Recommendation System
+    </div>
+
+    <p>
+        Transformer-Based Federated Learning for
+        Agricultural Crop Recommendation
+    </p>
+
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
