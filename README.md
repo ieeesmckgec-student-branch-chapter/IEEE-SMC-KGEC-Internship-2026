@@ -1,281 +1,133 @@
-# West Bengal Crop Yield Prediction (2026–2027)
+# PhantomSense
 
-A machine-learning project for predicting crop yield in West Bengal for the years 2026 and 2027 using Random Forest Regression and historical agricultural yield data.
+PhantomSense is a computer-vision component for assisting underwater search and
+rescue teams. The project uses side-scan sonar imagery and an object-detection
+model to highlight possible submerged human bodies, helping investigators
+prioritize areas for closer inspection.
 
-## Project Overview
+The accompanying internship report describes a broader system that combines
+sonar, GPS/IoT devices, chemical sensing, a server/API, alerts, and optional
+drone verification. This repository contains the current local image-inference
+prototype: `src/predict.py` and the included YOLO weights.
 
-This project uses historical crop-yield records to build Crop × Season specific Random Forest regression models. The workflow includes data cleaning, West Bengal filtering, temporal feature engineering, model training, evaluation, recursive forecasting, and visualization.
+> PhantomSense is decision-support software. It does not replace trained human
+> investigators, confirm a death, or perform recovery operations. Water
+> conditions, sonar artifacts, occlusion, and image quality can produce false
+> positives or false negatives.
 
-The model predicts future crop yield in Kg/Ha (kilograms per hectare).
+## Features
 
-## Objectives
+- Runs Ultralytics YOLO inference on a single image.
+- Uses CUDA automatically when an NVIDIA GPU is available; otherwise uses CPU.
+- Searches for the newest trained checkpoint under `src/runs/train/`.
+- Falls back to the bundled `src/yolo11n.pt` baseline when no trained run is found.
+- Prints each detection's class, confidence, and bounding-box coordinates.
+- Saves an annotated image to `src/outputs/`.
 
-- Clean and prepare the historical agricultural dataset.
-- Extract records belonging to West Bengal.
-- Organize the data by Crop Name and Season.
-- Generate historical time-dependent features.
-- Train Random Forest Regression models.
-- Evaluate the models using MAE and R².
-- Predict crop yield for 2026 and 2027.
-- Generate visual representations of the predictions.
-- Save the final prediction results as a CSV file.
+## Repository Structure
 
-## Dataset
-
-**Dataset**: State-wise Yield of Food Grains in Kharif and Rabi Seasons
-
-**Expected dataset file**:
-`State-wise Yield of Food Grains in Kharif and Rabi seasons (4).csv`
-
-### Important fields used by the project:
-
-| Field | Description |
-| --- | --- |
-| Year | Agricultural year |
-| State / Uts | State or Union Territory |
-| Crop Name | Name of crop/crop group |
-| Season | Agricultural season |
-| Yield | Crop yield in Kg/Ha |
-
-Place the original dataset file in the project directory before running the code.
-
-## Methodology
-
-```
-Historical Agricultural Dataset
-            ↓
-Data Loading
-            ↓
-Year Extraction and Cleaning
-            ↓
-West Bengal Filtering
-            ↓
-Crop × Season Grouping
-            ↓
-Feature Engineering
-            ↓
-Train/Test Evaluation
-            ↓
-Random Forest Regression
-            ↓
-Final Model Training
-            ↓
-Recursive Forecasting
-            ↓
-2026 Prediction
-            ↓
-2027 Prediction
-            ↓
-CSV Output + Visualization
-```
-
-## Feature Engineering
-
-Five temporal features are generated for each Crop × Season group:
-- `year_idx` — sequential position of the observation.
-- `lag1` — previous yield value.
-- `lag2` — yield value from two observations earlier.
-- `roll3_mean` — rolling mean based on recent yield observations.
-- `pct_change` — relative change from the previous yield value.
-
-## Random Forest Model
-
-The implementation uses:
-```python
-RandomForestRegressor(
-    n_estimators=300,
-    random_state=42
-)
-```
-
-### Main Configuration
-
-| Parameter | Value |
-| --- | --- |
-| Model | RandomForestRegressor |
-| Number of Trees | 300 |
-| Random State | 42 |
-| Task | Regression |
-| Target | Crop Yield (Kg/Ha) |
-
-## Model Evaluation
-
-For groups with sufficient historical observations, the model is evaluated using a train/test split.
-- **Test size**: 25%
-- **Random state**: 42
-- **Metrics**:
-  - Mean Absolute Error (MAE)
-  - R² Score
-
-## Recursive Forecasting
-
-The model uses recursive forecasting for future years:
-
-```
-Historical Yield Data
-        ↓
-Generate Features
-        ↓
-Predict Future Year
-        ↓
-Add Prediction to History
-        ↓
-Generate Updated Features
-        ↓
-Predict Next Future Year
-```
-
-The final target years are 2026 and 2027.
-
-## Handling Insufficient Data
-
-Some Crop × Season groups may not contain enough historical observations for reliable Random Forest training.
-
-The implementation therefore contains fallback logic:
-- **Linear Trend** when the implemented conditions permit it.
-- **Persistence Fallback** when the historical data are too sparse or unsuitable for trend-based forecasting.
-
-The prediction method used for each group is recorded in the output.
-
-## Prediction Output
-
-The final prediction results are saved as:
-`wb_predicted_yield_2026-2027.csv`
-
-The output includes:
-- Crop Name
-- Season
-- Predicted Yield for 2026
-- Predicted Yield for 2027
-- Prediction Method
-- Test MAE
-- Test R²
-
-## Visualization
-
-The project includes visualization code for comparing predicted crop yields for 2026 and 2027.
-
-Generated graphs can be stored in:
-`results/`
-
-## Project Structure
-
-```
-West-Bengal-Crop-Yield-Prediction/
-│
-├── data/
-│   └── State-wise Yield of Food Grains in Kharif and Rabi seasons (4).csv
-│
+```text
+.
+├── docs/
+│   └── IEEE_SMC_SBC_KGEC_2.pdf   # Internship report
 ├── src/
-│   ├── crop_yield_random_forest.py
-│   └── visualization.py
-│
-├── results/
-│   ├── wb_predicted_yield_2026-2027.csv
-│   └── prediction_graph.png
-│
-├── report/
-│   └── Research_Report.pdf
-│
-├── README.md
-└── requirements.txt
+│   ├── predict.py                 # Inference entry point
+│   ├── yolo11n.pt                 # Fallback model used by predict.py
+│   └── yolo26n.pt                 # Additional bundled model
+├── requirements.txt
+└── README.md
 ```
 
-Adjust the filenames and folders to match your actual GitHub repository.
+The repository does not include a dataset, a sample image, or a `runs/`
+training directory. Add those locally when needed; generated outputs are
+written to `src/outputs/`.
 
 ## Requirements
 
-Install the required libraries:
+- Python 3.10 or newer
+- `pip`
+- Optional: an NVIDIA GPU with a compatible PyTorch/CUDA installation
+
+Install the project dependencies from the repository root:
+
 ```bash
-pip install pandas numpy scikit-learn matplotlib seaborn
+python -m venv .venv
 ```
-Or:
+
+Activate the environment:
+
 ```bash
-pip install -r requirements.txt
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+# macOS/Linux
+source .venv/bin/activate
 ```
 
-## How to Run
+Then install the dependencies:
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/SOUVIK251/Crop-Yield-prediction.git
-   cd Crop-Yield-prediction
-   ```
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
 
-2. **Add the dataset**
-   Place the dataset inside the configured `data/` folder.
+## Running Inference
 
-3. **Run the prediction code**
-   ```bash
-   python src/crop_yield_random_forest.py
-   ```
+`predict.py` currently uses the image name in `IMAGE_NAME`. Place that image at
+`src/images/4df43a1e-3377112912_10AUG25_1458_00.png`, or change `IMAGE_NAME` to
+the name of an image in `src/images/` or to an existing path.
 
-4. **Run the visualization code**
-   ```bash
-   python src/visualization.py
-   ```
+From the repository root, run:
 
-5. **Check the results**
-   The prediction file will be generated as:
-   `wb_predicted_yield_2026-2027.csv`
+```bash
+python src/predict.py
+```
 
-## Important Results
+The script reports the selected device and model, then prints detections such
+as class name, confidence, and `[x1, y1, x2, y2]` coordinates. The annotated
+result is saved as:
 
-The supplied experiment contains 31 Crop × Season combinations.
+```text
+src/outputs/marked_<input-stem>.png
+```
 
-Some reported evaluation results are:
+For example, the default image produces
+`src/outputs/marked_4df43a1e-3377112912_10AUG25_1458_00.png`.
 
-| Crop | Season | MAE | R² |
-| --- | --- | --- | --- |
-| Oilseeds | Kharif | 31.9 | 0.852 |
-| Rice | Total | 64.0 | 0.724 |
-| Foodgrains | Total | 60.9 | 0.678 |
-| Rice | Kharif | 61.2 | 0.619 |
-| Groundnut | Rabi | 165.2 | 0.585 |
+## Model Selection
 
-The strongest reported R² value is **0.852** for **Oilseeds — Kharif**.
+The script checks `src/runs/train/` for experiment directories and selects the
+most recently modified directory containing `weights/best.pt`. This makes a
+locally trained model take precedence automatically. If no trained checkpoint
+is found, it uses `src/yolo11n.pt`.
 
-## File Links
+Inference settings in `src/predict.py` are currently:
 
-- **Dataset File**: [State-wise Yield of Food Grains in Kharif and Rabi seasons (4).csv](data/State-wise%20Yield%20of%20Food%20Grains%20in%20Kharif%20and%20Rabi%20seasons%20(4).csv)
+| Setting | Value |
+| --- | ---: |
+| Confidence threshold | `0.20` |
+| IoU threshold | `0.45` |
+| Image size | `1280` |
+| Output annotation | Enabled by OpenCV save |
 
-## Limitations
+## Project Direction
 
-- The current model mainly uses historical yield and derived temporal features.
-- Rainfall and temperature are not included.
-- Soil properties are not included.
-- Fertilizer and irrigation information are not included.
-- Some Crop × Season groups have limited historical observations.
-- Recursive forecasting can propagate prediction errors.
-- Model performance varies across Crop × Season groups.
-- Some groups use fallback forecasting because of insufficient data.
-- The evaluation uses a random train/test split rather than strict chronological validation.
+The report presents the following intended development path:
 
-## Future Scope
+1. Use sonar imagery to identify suspicious underwater regions.
+2. Add chemical sensing for blood and decomposing organic material as
+	supporting evidence.
+3. Connect sensors through a server, API, dashboard, and alert system.
+4. Add drone-based verification and more localized IoT deployment.
 
-- Integrate rainfall, temperature, humidity, and other weather variables.
-- Add soil, fertilizer, and irrigation information.
-- Use chronological or walk-forward validation.
-- Compare Random Forest with XGBoost, Gradient Boosting, Extra Trees, and ANN.
-- Perform hyperparameter optimization.
-- Analyze feature importance.
-- Generate prediction intervals.
-- Extend prediction beyond 2027.
-- Develop an interactive crop-yield prediction interface.
+Only the first computer-vision stage is represented by the executable code in
+this checkout. The chemical sensing, backend, dashboard, alerting, and drone
+features remain future work.
 
-## Technologies Used
+## Reference
 
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- Matplotlib
-- Seaborn
-- Random Forest Regression
+See [`docs/IEEE_SMC_SBC_KGEC_2.pdf`](docs/IEEE_SMC_SBC_KGEC_2.pdf) for the full
+internship report, system proposal, limitations, and methodology. The report
+references the AquaScan 1K Side Scan Sonar Dataset:
 
-## Author
-
-**Souvik Kundu**  
-Electronics and Communication Engineering (ECE)  
-IEEE SMC Student Branch Chapter, KGEC  
-Research Internship Programme 2026
+<https://zenodo.org/records/18771165>
