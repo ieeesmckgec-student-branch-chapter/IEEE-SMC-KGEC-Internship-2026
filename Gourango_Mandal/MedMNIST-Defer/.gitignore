@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Full MedMNIST archives (~574 MB) are downloaded, not committed.
+data/raw/*.npz
+data/raw/*.part
+
+# Fresh run outputs; only results/golden/ is committed.
+results/benchmark_*.json
+results/*.log
+
+.ipynb_checkpoints/
+.DS_Store

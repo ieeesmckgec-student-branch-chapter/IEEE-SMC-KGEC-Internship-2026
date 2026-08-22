@@ -1,0 +1,293 @@
+{
+  "collection": "MedMNIST v2 (2D subsets)",
+  "resolution": "28x28",
+  "source": "https://medmnist.com/",
+  "zenodo_record": "https://zenodo.org/records/10519652",
+  "citation": "Yang et al., MedMNIST v2, Scientific Data 10:41 (2023)",
+  "datasets": {
+    "bloodmnist": {
+      "task": "multi-class",
+      "n_channels": 3,
+      "n_classes": 8,
+      "labels": {
+        "0": "basophil",
+        "1": "eosinophil",
+        "2": "erythroblast",
+        "3": "immature granulocytes(myelocytes, metamyelocytes and promyelocytes)",
+        "4": "lymphocyte",
+        "5": "monocyte",
+        "6": "neutrophil",
+        "7": "platelet"
+      },
+      "modality": "Blood cell microscopy",
+      "n_samples": {
+        "train": 11959,
+        "val": 1712,
+        "test": 3421
+      },
+      "license": "CC BY 4.0",
+      "md5": "7053d0359d879ad8a5505303e11de1dc",
+      "url": "https://zenodo.org/records/10519652/files/bloodmnist.npz?download=1"
+    },
+    "breastmnist": {
+      "task": "binary-class",
+      "n_channels": 1,
+      "n_classes": 2,
+      "labels": {
+        "0": "malignant",
+        "1": "normal, benign"
+      },
+      "modality": "Breast ultrasound",
+      "n_samples": {
+        "train": 546,
+        "val": 78,
+        "test": 156
+      },
+      "license": "CC BY 4.0",
+      "md5": "750601b1f35ba3300ea97c75c52ff8f6",
+      "url": "https://zenodo.org/records/10519652/files/breastmnist.npz?download=1"
+    },
+    "chestmnist": {
+      "task": "multi-label, binary-class",
+      "n_channels": 1,
+      "n_classes": 14,
+      "labels": {
+        "0": "atelectasis",
+        "1": "cardiomegaly",
+        "2": "effusion",
+        "3": "infiltration",
+        "4": "mass",
+        "5": "nodule",
+        "6": "pneumonia",
+        "7": "pneumothorax",
+        "8": "consolidation",
+        "9": "edema",
+        "10": "emphysema",
+        "11": "fibrosis",
+        "12": "pleural",
+        "13": "hernia"
+      },
+      "modality": "Chest X-ray (multi-label)",
+      "n_samples": {
+        "train": 78468,
+        "val": 11219,
+        "test": 22433
+      },
+      "license": "CC BY 4.0",
+      "md5": "02c8a6516a18b556561a56cbdd36c4a8",
+      "url": "https://zenodo.org/records/10519652/files/chestmnist.npz?download=1"
+    },
+    "dermamnist": {
+      "task": "multi-class",
+      "n_channels": 3,
+      "n_classes": 7,
+      "labels": {
+        "0": "actinic keratoses and intraepithelial carcinoma",
+        "1": "basal cell carcinoma",
+        "2": "benign keratosis-like lesions",
+        "3": "dermatofibroma",
+        "4": "melanoma",
+        "5": "melanocytic nevi",
+        "6": "vascular lesions"
+      },
+      "modality": "Dermatoscopy",
+      "n_samples": {
+        "train": 7007,
+        "val": 1003,
+        "test": 2005
+      },
+      "license": "CC BY-NC 4.0",
+      "md5": "0744692d530f8e62ec473284d019b0c7",
+      "url": "https://zenodo.org/records/10519652/files/dermamnist.npz?download=1"
+    },
+    "octmnist": {
+      "task": "multi-class",
+      "n_channels": 1,
+      "n_classes": 4,
+      "labels": {
+        "0": "choroidal neovascularization",
+        "1": "diabetic macular edema",
+        "2": "drusen",
+        "3": "normal"
+      },
+      "modality": "Retinal OCT",
+      "n_samples": {
+        "train": 97477,
+        "val": 10832,
+        "test": 1000
+      },
+      "license": "CC BY 4.0",
+      "md5": "c68d92d5b585d8d81f7112f81e2d0842",
+      "url": "https://zenodo.org/records/10519652/files/octmnist.npz?download=1"
+    },
+    "organamnist": {
+      "task": "multi-class",
+      "n_channels": 1,
+      "n_classes": 11,
+      "labels": {
+        "0": "bladder",
+        "1": "femur-left",
+        "2": "femur-right",
+        "3": "heart",
+        "4": "kidney-left",
+        "5": "kidney-right",
+        "6": "liver",
+        "7": "lung-left",
+        "8": "lung-right",
+        "9": "pancreas",
+        "10": "spleen"
+      },
+      "modality": "Abdominal CT (axial)",
+      "n_samples": {
+        "train": 34561,
+        "val": 6491,
+        "test": 17778
+      },
+      "license": "CC BY 4.0",
+      "md5": "68e3f8846a6bd62f0c9bf841c0d9eacc",
+      "url": "https://zenodo.org/records/10519652/files/organamnist.npz?download=1"
+    },
+    "organcmnist": {
+      "task": "multi-class",
+      "n_channels": 1,
+      "n_classes": 11,
+      "labels": {
+        "0": "bladder",
+        "1": "femur-left",
+        "2": "femur-right",
+        "3": "heart",
+        "4": "kidney-left",
+        "5": "kidney-right",
+        "6": "liver",
+        "7": "lung-left",
+        "8": "lung-right",
+        "9": "pancreas",
+        "10": "spleen"
+      },
+      "modality": "Abdominal CT (coronal)",
+      "n_samples": {
+        "train": 12975,
+        "val": 2392,
+        "test": 8216
+      },
+      "license": "CC BY 4.0",
+      "md5": "b9ceb9546e10131b32923c5bbeaea2b1",
+      "url": "https://zenodo.org/records/10519652/files/organcmnist.npz?download=1"
+    },
+    "organsmnist": {
+      "task": "multi-class",
+      "n_channels": 1,
+      "n_classes": 11,
+      "labels": {
+        "0": "bladder",
+        "1": "femur-left",
+        "2": "femur-right",
+        "3": "heart",
+        "4": "kidney-left",
+        "5": "kidney-right",
+        "6": "liver",
+        "7": "lung-left",
+        "8": "lung-right",
+        "9": "pancreas",
+        "10": "spleen"
+      },
+      "modality": "Abdominal CT (sagittal)",
+      "n_samples": {
+        "train": 13932,
+        "val": 2452,
+        "test": 8827
+      },
+      "license": "CC BY 4.0",
+      "md5": "9ab87b696fb54e2a387ebe992d6ed5f1",
+      "url": "https://zenodo.org/records/10519652/files/organsmnist.npz?download=1"
+    },
+    "pathmnist": {
+      "task": "multi-class",
+      "n_channels": 3,
+      "n_classes": 9,
+      "labels": {
+        "0": "adipose",
+        "1": "background",
+        "2": "debris",
+        "3": "lymphocytes",
+        "4": "mucus",
+        "5": "smooth muscle",
+        "6": "normal colon mucosa",
+        "7": "cancer-associated stroma",
+        "8": "colorectal adenocarcinoma epithelium"
+      },
+      "modality": "Colorectal histopathology",
+      "n_samples": {
+        "train": 89996,
+        "val": 10004,
+        "test": 7180
+      },
+      "license": "CC BY 4.0",
+      "md5": "a8b06965200029087d5bd730944a56c1",
+      "url": "https://zenodo.org/records/10519652/files/pathmnist.npz?download=1"
+    },
+    "pneumoniamnist": {
+      "task": "binary-class",
+      "n_channels": 1,
+      "n_classes": 2,
+      "labels": {
+        "0": "normal",
+        "1": "pneumonia"
+      },
+      "modality": "Chest X-ray (pediatric)",
+      "n_samples": {
+        "train": 4708,
+        "val": 524,
+        "test": 624
+      },
+      "license": "CC BY 4.0",
+      "md5": "28209eda62fecd6e6a2d98b1501bb15f",
+      "url": "https://zenodo.org/records/10519652/files/pneumoniamnist.npz?download=1"
+    },
+    "retinamnist": {
+      "task": "ordinal-regression",
+      "n_channels": 3,
+      "n_classes": 5,
+      "labels": {
+        "0": "0",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4"
+      },
+      "modality": "Fundus photography",
+      "n_samples": {
+        "train": 1080,
+        "val": 120,
+        "test": 400
+      },
+      "license": "CC BY 4.0",
+      "md5": "bd4c0672f1bba3e3a89f0e4e876791e4",
+      "url": "https://zenodo.org/records/10519652/files/retinamnist.npz?download=1"
+    },
+    "tissuemnist": {
+      "task": "multi-class",
+      "n_channels": 1,
+      "n_classes": 8,
+      "labels": {
+        "0": "Collecting Duct, Connecting Tubule",
+        "1": "Distal Convoluted Tubule",
+        "2": "Glomerular endothelial cells",
+        "3": "Interstitial endothelial cells",
+        "4": "Leukocytes",
+        "5": "Podocytes",
+        "6": "Proximal Tubule Segments",
+        "7": "Thick Ascending Limb"
+      },
+      "modality": "Kidney cortex microscopy",
+      "n_samples": {
+        "train": 165466,
+        "val": 23640,
+        "test": 47280
+      },
+      "license": "CC BY 4.0",
+      "md5": "ebe78ee8b05294063de985d821c1c34b",
+      "url": "https://zenodo.org/records/10519652/files/tissuemnist.npz?download=1"
+    }
+  }
+}
