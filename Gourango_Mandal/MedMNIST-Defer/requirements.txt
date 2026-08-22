@@ -1,0 +1,14 @@
+# MedMNIST-Defer benchmark dependencies.
+# Install with: pip install -r requirements.txt
+#
+# torch/torchvision: pick the build that matches your CUDA version if you want
+# GPU acceleration; the CPU wheels are enough for the sample run.
+torch>=2.0
+torchvision>=0.15
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+
+# Only needed to download the full collection (scripts/download_data.py).
+# The committed sample data runs without it.
+medmnist>=3.0

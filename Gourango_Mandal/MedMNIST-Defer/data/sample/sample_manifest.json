@@ -1,0 +1,69 @@
+{
+  "description": "Class-stratified subsets of MedMNIST v2 for end-to-end smoke runs",
+  "seed": 42,
+  "train_target_per_dataset": 600,
+  "test_target_per_dataset": 400,
+  "total_bytes": 12928450,
+  "datasets": {
+    "bloodmnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 2078149
+    },
+    "breastmnist": {
+      "n_train": 546,
+      "n_test": 156,
+      "bytes": 502726
+    },
+    "chestmnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 741107
+    },
+    "dermamnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 1975981
+    },
+    "octmnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 509765
+    },
+    "organamnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 628096
+    },
+    "organcmnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 634966
+    },
+    "organsmnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 614187
+    },
+    "pathmnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 1927842
+    },
+    "pneumoniamnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 722414
+    },
+    "retinamnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 2043914
+    },
+    "tissuemnist": {
+      "n_train": 600,
+      "n_test": 400,
+      "bytes": 549303
+    }
+  }
+}
