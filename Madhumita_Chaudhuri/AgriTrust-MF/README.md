@@ -6,7 +6,7 @@
 
 | Field | Details |
 |-------|---------|
-| **Student** | Madhumita Chaudhury |
+| **Student** | Madhumita Chaudhuri |
 | **Department** | Computer Science & Engineering |
 | **Mentor** | Kaustabh Ganguly |
 | **Mentor Affiliation** | Senior AI/ML Engineer, Gracenote |
