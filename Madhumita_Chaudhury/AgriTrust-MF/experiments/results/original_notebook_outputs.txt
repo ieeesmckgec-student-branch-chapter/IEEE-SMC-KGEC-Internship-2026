@@ -1,0 +1,100 @@
+
+======================================================================
+CELL 1 (code) OUTPUTS
+======================================================================
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m9.7/9.7 MB[0m [31m81.2 MB/s[0m eta [36m0:00:00[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m12.4/12.4 MB[0m [31m96.1 MB/s[0m eta [36m0:00:00[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m137.5/137.5 kB[0m [31m11.7 MB/s[0m eta [36m0:00:00[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m2.4/2.4 MB[0m [31m61.4 MB/s[0m eta [36m0:00:00[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m54.5/54.5 kB[0m [31m4.2 MB/s[0m eta [36m0:00:00[0m
+[?25h
+
+======================================================================
+CELL 2 (code) OUTPUTS
+======================================================================
+Qiskit: 2.5.1
+Qiskit Aer: 0.17.2
+Configuration: 150 sensors, 9 qubits, p=1, shots=2048
+
+
+======================================================================
+CELL 4 (code) OUTPUTS
+======================================================================
+Return from COBYLA because the trust region radius reaches its lower bound.
+Number of function values = 57   Least value of F = 4.924650128738957
+The corresponding X is: [1.26914468 4.11163788]
+
+
+========== HYBRID QAOA RESULT ==========
+Candidate relay layers: [[6, 127, 63], [7, 51, 14], [61, 70, 91]]
+Adaptive objective weights: {'energy': 0.26775742254809554, 'risk': 0.41985891781245954, 'load': 0.13387871127404777, 'quality': 0.17850494836539704}
+Selected route (mode): [12, 6, 7, 61, 150]
+Exact 27-route oracle: [12, 6, 7, 61, 150]
+Selected cost=4.164461, exact cost=4.164461, quality=1.0000
+Feasible probability=1.00000000
+PDR=0.2367, energy=0.352529 J
+Transpiled circuit depth: 25
+Gate counts: {'rzz': 18, 'u2': 12, 'cx': 12, 'u3': 9, 'rz': 9, 'rxx': 9, 'ryy': 9, 'measure': 9, 'barrier': 4}
+
+                                                                           value
+seed                                                                           7
+number_of_sensor_nodes                                                       150
+qubits                                                                         9
+qaoa_depth                                                                     1
+shots                                                                       2048
+communication_range_m                                                       30.0
+source                                                                        12
+sink                                                                         150
+candidates                             [[6, 127, 63], [7, 51, 14], [61, 70, 91]]
+adaptive_weights               {'energy': 0.26775742254809554, 'risk': 0.4198...
+qubo_ising_max_error                                                         0.0
+selected_choices                                                       [0, 0, 0]
+selected_route                                               [12, 6, 7, 61, 150]
+selected_route_cost                                                     4.164461
+exact_choices                                                          [0, 0, 0]
+exact_route                                                  [12, 6, 7, 61, 150]
+exact_route_cost                                                        4.164461
+normalized_route_quality                                                     1.0
+mode_probability                                                         0.77002
+best_sampled_cost                                                       4.164461
+feasible_state_probability                                                   1.0
+optimizer_success                                                           True
+optimizer_message              Return from COBYLA because the trust region ra...
+optimizer_evaluations                                                         57
+circuit_depth_transpiled                                                      25
+circuit_gate_counts            {'rzz': 18, 'u2': 12, 'cx': 12, 'u3': 9, 'rz':...
+packets_sent                                                                 300
+packets_delivered                                                             71
+pdr                                                                     0.236667
+natural_drops                                                                 97
+malicious_drops                                                                0
+energy_consumed_j                                                       0.352529
+energy_per_delivered_packet_j                                           0.004965
+alive_nodes                                                                  149
+                 attack  precision  recall   f1  tp  fp  fn
+0             blackhole        1.0     1.0  1.0   3   0   0
+1  selective_forwarding        1.0     1.0  1.0   3   0   0
+2              sinkhole        1.0     1.0  1.0   3   0   0
+3              wormhole        1.0     1.0  1.0   3   0   0
+4                 sybil        1.0     1.0  1.0   3   0   0
+    bitstring  shots  probability       cost    choices
+4   001001001   1577     0.770020   4.164461  (0, 0, 0)
+9   001001010    182     0.088867   4.214806  (1, 0, 0)
+5   001010001    113     0.055176   9.024907  (0, 1, 0)
+13  010001001     85     0.041504   9.143335  (0, 0, 1)
+8   001100001     21     0.010254   8.984210  (0, 2, 0)
+7   010010001     15     0.007324  14.133657  (0, 1, 1)
+10  100001001     11     0.005371   9.049718  (0, 0, 2)
+12  001001100     11     0.005371   9.260030  (2, 0, 0)
+11  010001010     10     0.004883   9.193679  (1, 0, 1)
+15  010100001      7     0.003418  14.046464  (0, 2, 1)
+
+======================================================================
+CELL 5 (code) OUTPUTS
+======================================================================
+<Figure size 8565x785.944 with 1 Axes>
+<Figure size 800x400 with 1 Axes>
+<Figure size 1000x400 with 1 Axes>
+<Figure size 900x400 with 1 Axes>
+<Figure size 1000x800 with 1 Axes>
+Saved: /content/AgriTrust_9Qubit_results.zip

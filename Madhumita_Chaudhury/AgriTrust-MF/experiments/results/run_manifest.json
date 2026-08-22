@@ -1,0 +1,61 @@
+{
+  "smoke": false,
+  "stages": {
+    "07": {
+      "missing_outputs": [
+        "07_scaling_raw.csv",
+        "07_scaling_summary.csv"
+      ],
+      "returncodes": [
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "seconds": 1056.947189045,
+      "status": "failed"
+    },
+    "09": {
+      "missing_outputs": [],
+      "returncodes": [
+        0
+      ],
+      "seconds": 670.0425899369998,
+      "status": "ok"
+    },
+    "10": {
+      "missing_outputs": [],
+      "returncodes": [
+        0
+      ],
+      "seconds": 12.0017723320002,
+      "status": "ok"
+    },
+    "11": {
+      "missing_outputs": [],
+      "returncodes": [
+        0
+      ],
+      "seconds": 182.01446774400029,
+      "status": "ok"
+    },
+    "12": {
+      "missing_outputs": [],
+      "returncodes": [
+        0
+      ],
+      "seconds": 18.001764310999988,
+      "status": "ok"
+    },
+    "tests": {
+      "missing_outputs": [],
+      "returncodes": [
+        0
+      ],
+      "seconds": 6.001844688999881,
+      "status": "ok"
+    }
+  },
+  "total_seconds": 1056.947553034
+}

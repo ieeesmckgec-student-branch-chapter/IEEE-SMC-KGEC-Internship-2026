@@ -1,0 +1,9 @@
+numpy>=2.0
+scipy>=1.11
+pandas>=2.0
+qiskit>=2.0
+qiskit-aer>=0.17
+matplotlib>=3.8
+
+# Optional: GPU-accelerated penalty-X simulator (CUDA 13.x)
+# cupy-cuda13x[ctk]>=14.0
